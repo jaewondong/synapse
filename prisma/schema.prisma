@@ -1,0 +1,35 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../lib/generated/prisma"
+}
+
+datasource db {
+  provider = "sqlite"
+}
+
+model AgentActionRecord {
+  id               String     @id
+  agentName        String
+  confidence       String
+  summary          String
+  detail           String
+  reasoningSummary String
+  sources          String     // JSON-encoded AgentActionSource[]
+  patientName      String
+  patientMrn       String
+  actionTimestamp  DateTime
+  category         String
+  status           String     @default("pending")
+  createdAt        DateTime   @default(now())
+  decisions        Decision[]
+}
+
+model Decision {
+  id        String            @id @default(cuid())
+  actionId  String
+  action    AgentActionRecord @relation(fields: [actionId], references: [id])
+  operation String            // 'approve' | 'reject' | 'snooze'
+  reason    String?
+  decidedBy String
+  decidedAt DateTime          @default(now())
+}

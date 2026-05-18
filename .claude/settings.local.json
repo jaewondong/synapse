@@ -1,0 +1,20 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npm install *)",
+      "Bash(npm run *)",
+      "Bash(npx next *)",
+      "Bash(curl -s http://localhost:3000)",
+      "Bash(curl -s http://localhost:3000/inbox -o /dev/null -w \"%{http_code}\")",
+      "Bash(curl -s http://localhost:3000/schedule -o /dev/null -w \"%{http_code}\")",
+      "Bash(curl -s http://localhost:3000/patients -o /dev/null -w \"%{http_code}\")",
+      "Bash(curl -s \"http://localhost:3000/inbox?category=agent-review\")",
+      "Bash(curl -s \"http://localhost:3000/inbox?category=messages\")",
+      "Bash(curl -s \"http://localhost:3000/\")",
+      "Bash(npx prisma *)",
+      "PowerShell(npx prisma init --datasource-provider sqlite 2>&1)",
+      "PowerShell(npx prisma --version 2>&1)",
+      "PowerShell(ls node_modules | Where-Object { $_.Name -eq \"dotenv\" } 2>&1)"
+    ]
+  }
+}
