@@ -1,9 +1,18 @@
 'use client'
 
 import { useRef, useEffect, useState, type FormEvent } from 'react'
-import { SendHorizonal, Bot, User, Loader2, ChevronDown, ChevronUp, RotateCcw } from 'lucide-react'
+import {
+  SendHorizonal,
+  Bot,
+  User,
+  Loader2,
+  ChevronDown,
+  ChevronUp,
+  RotateCcw,
+  CheckCircle2,
+} from 'lucide-react'
 import { cn } from '@/lib/utils'
-import type { ChatMessage, ToolCallUI } from '@/lib/hooks/use-scheduling-agent'
+import type { ChatMessage, SlotObject, ToolCallUI } from '@/lib/hooks/use-scheduling-agent'
 
 const TOOL_LABELS: Record<string, string> = {
   list_appointments: 'Listed appointments',
@@ -12,6 +21,26 @@ const TOOL_LABELS: Record<string, string> = {
   create_appointment: 'Created appointment',
   reschedule_appointment: 'Rescheduled appointment',
   cancel_appointment: 'Cancelled appointment',
+}
+
+function formatSlotDateTime(iso: string): string {
+  const d = new Date(iso)
+  const datePart = d.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })
+  const h = d.getHours()
+  const m = d.getMinutes()
+  const suffix = h >= 12 ? 'PM' : 'AM'
+  const displayH = h % 12 || 12
+  const timePart = m === 0
+    ? `${displayH}:00 ${suffix}`
+    : `${displayH}:${String(m).padStart(2, '0')} ${suffix}`
+  return `${datePart} · ${timePart}`
+}
+
+function renderBold(text: string) {
+  const parts = text.split(/\*\*(.*?)\*\*/g)
+  return parts.map((part, i) =>
+    i % 2 === 1 ? <strong key={i}>{part}</strong> : part,
+  )
 }
 
 function ToolCallBadge({ call }: { call: ToolCallUI }) {
@@ -59,8 +88,188 @@ function ToolCallBadge({ call }: { call: ToolCallUI }) {
   )
 }
 
-function MessageBubble({ msg }: { msg: ChatMessage }) {
+function SlotCard({ slot }: { slot: SlotObject }) {
+  return (
+    <div className="rounded-xl border border-border bg-background p-3 space-y-2">
+      <div>
+        <p className="text-sm font-semibold">{formatSlotDateTime(slot.datetime)}</p>
+        <p className="text-xs text-muted-foreground mt-0.5">
+          {slot.visit_type} · {slot.provider_name} · {slot.duration_min} min · {slot.modality}
+        </p>
+        <p className="text-xs text-muted-foreground">{slot.location}</p>
+      </div>
+      <div className="flex items-center gap-2 flex-wrap">
+        <span
+          className={cn(
+            'inline-flex items-center rounded-md px-2 py-0.5 text-[10px] font-medium border',
+            slot.no_show_risk === 'Low'
+              ? 'bg-green-50 text-green-700 border-green-200'
+              : slot.no_show_risk === 'Medium'
+              ? 'bg-amber-50 text-amber-700 border-amber-200'
+              : 'bg-red-50 text-red-700 border-red-200',
+          )}
+        >
+          No-show risk: {slot.no_show_risk}
+        </span>
+        <span
+          className={cn(
+            'inline-flex items-center rounded-md px-2 py-0.5 text-[10px] font-medium border',
+            slot.eligibility_status === 'OK'
+              ? 'bg-chart-info-bg text-chart-info-text border-chart-info-text/20'
+              : 'bg-chart-warning-bg text-chart-warning-text border-chart-warning-border',
+          )}
+        >
+          Eligibility {slot.eligibility_status}
+        </span>
+      </div>
+    </div>
+  )
+}
+
+function SlotProposalCard({
+  msg,
+  onApprove,
+  onAlternatives,
+}: {
+  msg: ChatMessage
+  onApprove: (slot: SlotObject) => void
+  onAlternatives: (messageId: string) => void
+}) {
+  const [showWhy, setShowWhy] = useState(false)
+  const [approved, setApproved] = useState(false)
+
+  if (!msg.slot) return null
+
+  const handleApprove = () => {
+    setApproved(true)
+    onApprove(msg.slot!)
+  }
+
+  return (
+    <div className="flex-1 min-w-0 max-w-[90%] space-y-2">
+      {msg.rationale && (
+        <p className="text-sm text-foreground">{renderBold(msg.rationale)}</p>
+      )}
+
+      <SlotCard slot={msg.slot} />
+
+      {/* Actions */}
+      {!approved ? (
+        <div className="flex items-center gap-2">
+          <button
+            onClick={handleApprove}
+            className="px-3 py-1.5 rounded-lg bg-accent text-white text-xs font-medium hover:brightness-110 transition-all"
+          >
+            Approve & book
+          </button>
+          <button
+            onClick={() => onAlternatives(msg.id)}
+            className="px-3 py-1.5 rounded-lg border border-border text-xs font-medium hover:bg-muted transition-colors"
+          >
+            Show alternatives
+          </button>
+        </div>
+      ) : (
+        <div className="flex items-center gap-1.5 text-xs text-confidence-high font-medium">
+          <CheckCircle2 className="h-3.5 w-3.5" />
+          Booking confirmed
+        </div>
+      )}
+
+      {/* Audit strip */}
+      <div className="flex items-center gap-1.5 text-[10px] text-muted-foreground">
+        <span className="h-1.5 w-1.5 rounded-full bg-confidence-high shrink-0" />
+        <span>Scheduling Agent · {msg.confidence}% confidence ·</span>
+        <button
+          onClick={() => setShowWhy((v) => !v)}
+          className="text-accent hover:underline"
+        >
+          why this slot?
+        </button>
+      </div>
+      {showWhy && msg.explanation && (
+        <div className="rounded-md bg-muted/50 border border-border px-2.5 py-2 text-[11px] text-muted-foreground">
+          {msg.explanation}
+        </div>
+      )}
+    </div>
+  )
+}
+
+function SlotAlternativesCard({
+  msg,
+  onSelect,
+}: {
+  msg: ChatMessage
+  onSelect: (slot: SlotObject) => void
+}) {
+  if (!msg.slots) return null
+
+  return (
+    <div className="flex-1 min-w-0 max-w-[90%] space-y-2">
+      {msg.intro && (
+        <p className="text-sm text-muted-foreground">{msg.intro}</p>
+      )}
+      {msg.slots.map((slot) => (
+        <div key={slot.selectId} className="rounded-xl border border-border bg-background p-3">
+          <div className="flex items-start justify-between gap-2">
+            <div className="min-w-0">
+              <p className="text-sm font-semibold">{formatSlotDateTime(slot.datetime)}</p>
+              <p className="text-xs text-muted-foreground mt-0.5">
+                {slot.visit_type} · {slot.provider_name} · {slot.modality}
+              </p>
+            </div>
+            <button
+              onClick={() => onSelect(slot)}
+              className="shrink-0 px-2.5 py-1 rounded-lg border border-border text-xs font-medium hover:bg-accent hover:text-white hover:border-accent transition-all"
+            >
+              Select
+            </button>
+          </div>
+        </div>
+      ))}
+    </div>
+  )
+}
+
+function MessageBubble({
+  msg,
+  onApproveSlot,
+  onShowAlternatives,
+  onSelectAlternative,
+}: {
+  msg: ChatMessage
+  onApproveSlot?: (slot: SlotObject) => void
+  onShowAlternatives?: (messageId: string) => void
+  onSelectAlternative?: (slot: SlotObject) => void
+}) {
   const isUser = msg.role === 'user'
+
+  if (msg.type === 'slot_proposal' && msg.slot) {
+    return (
+      <div className="flex gap-2.5 flex-row">
+        <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full mt-0.5 bg-agent-tint border border-border text-accent">
+          <Bot className="h-3 w-3" />
+        </div>
+        <SlotProposalCard
+          msg={msg}
+          onApprove={onApproveSlot ?? (() => {})}
+          onAlternatives={onShowAlternatives ?? (() => {})}
+        />
+      </div>
+    )
+  }
+
+  if (msg.type === 'slot_alternatives' && msg.slots) {
+    return (
+      <div className="flex gap-2.5 flex-row">
+        <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full mt-0.5 bg-agent-tint border border-border text-accent">
+          <Bot className="h-3 w-3" />
+        </div>
+        <SlotAlternativesCard msg={msg} onSelect={onSelectAlternative ?? (() => {})} />
+      </div>
+    )
+  }
 
   return (
     <div className={cn('flex gap-2.5', isUser ? 'flex-row-reverse' : 'flex-row')}>
@@ -93,7 +302,6 @@ function MessageBubble({ msg }: { msg: ChatMessage }) {
           )}
         </div>
 
-        {/* Tool calls */}
         {!isUser && msg.toolCalls && msg.toolCalls.length > 0 && (
           <div className="w-full max-w-[90%]">
             {msg.toolCalls.map((call, idx) => (
@@ -117,9 +325,20 @@ interface AgentChatProps {
   isLoading: boolean
   onSend: (content: string) => void
   onClear: () => void
+  onApproveSlot?: (slot: SlotObject) => void
+  onShowAlternatives?: (messageId: string) => void
+  onSelectAlternative?: (slot: SlotObject) => void
 }
 
-export function AgentChat({ messages, isLoading, onSend, onClear }: AgentChatProps) {
+export function AgentChat({
+  messages,
+  isLoading,
+  onSend,
+  onClear,
+  onApproveSlot,
+  onShowAlternatives,
+  onSelectAlternative,
+}: AgentChatProps) {
   const [input, setInput] = useState('')
   const bottomRef = useRef<HTMLDivElement>(null)
   const textareaRef = useRef<HTMLTextAreaElement>(null)
@@ -198,7 +417,15 @@ export function AgentChat({ messages, isLoading, onSend, onClear }: AgentChatPro
             </div>
           </div>
         ) : (
-          messages.map((msg) => <MessageBubble key={msg.id} msg={msg} />)
+          messages.map((msg) => (
+            <MessageBubble
+              key={msg.id}
+              msg={msg}
+              onApproveSlot={onApproveSlot}
+              onShowAlternatives={onShowAlternatives}
+              onSelectAlternative={onSelectAlternative}
+            />
+          ))
         )}
         <div ref={bottomRef} />
       </div>

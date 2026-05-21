@@ -4,6 +4,7 @@ import { useMemo } from 'react'
 import { ChevronLeft, ChevronRight } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import type { AppointmentFromApi } from '@/lib/hooks/use-appointments'
+import type { SlotObject } from '@/lib/hooks/use-scheduling-agent'
 
 const START_HOUR = 7
 const END_HOUR = 19
@@ -78,6 +79,8 @@ interface WeekCalendarProps {
   onToday: () => void
   appointments: AppointmentFromApi[]
   isLoading?: boolean
+  proposedSlot?: SlotObject | null
+  bookedSlot?: SlotObject | null
 }
 
 export function WeekCalendar({
@@ -87,6 +90,8 @@ export function WeekCalendar({
   onToday,
   appointments,
   isLoading,
+  proposedSlot,
+  bookedSlot,
 }: WeekCalendarProps) {
   const today = useMemo(() => {
     const d = new Date()
@@ -229,6 +234,46 @@ export function WeekCalendar({
                   </div>
                 )
               })}
+
+              {/* Proposed slot preview — dashed green outline */}
+              {proposedSlot && isSameDay(new Date(proposedSlot.datetime), day) && (() => {
+                const top = toPixels(proposedSlot.datetime)
+                const height = Math.max(proposedSlot.duration_min * PIXELS_PER_MINUTE, 20)
+                return (
+                  <div
+                    key="proposed"
+                    className="absolute left-1 right-1 rounded border-2 border-dashed border-green-400 bg-green-50/70 px-1.5 py-0.5 overflow-hidden pointer-events-none"
+                    style={{ top, height }}
+                  >
+                    <p className="text-[10px] font-semibold text-green-700 leading-tight">
+                      Proposed · {formatTime(proposedSlot.datetime)}
+                    </p>
+                  </div>
+                )
+              })()}
+
+              {/* Booked slot — optimistic filled block */}
+              {bookedSlot && isSameDay(new Date(bookedSlot.datetime), day) && (() => {
+                const top = toPixels(bookedSlot.datetime)
+                const height = Math.max(bookedSlot.duration_min * PIXELS_PER_MINUTE, 20)
+                return (
+                  <div
+                    key="booked"
+                    className="absolute left-1 right-1 rounded border border-green-300 bg-green-100 text-green-800 px-1.5 py-0.5 overflow-hidden"
+                    style={{ top, height }}
+                    title={`${bookedSlot.visit_type} · ${bookedSlot.provider_name} · ${formatTime(bookedSlot.datetime)}`}
+                  >
+                    <p className="text-[11px] font-semibold leading-tight truncate">
+                      {bookedSlot.visit_type}
+                    </p>
+                    {height > 28 && (
+                      <p className="text-[10px] leading-tight truncate opacity-75">
+                        {formatTime(bookedSlot.datetime)} · {bookedSlot.provider_name}
+                      </p>
+                    )}
+                  </div>
+                )
+              })()}
             </div>
           )
         })}

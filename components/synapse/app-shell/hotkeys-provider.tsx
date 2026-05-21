@@ -8,6 +8,7 @@ import { Keyboard } from 'lucide-react'
 const shortcuts = [
   { keys: '⌘K', description: 'Open command palette' },
   { keys: '⌘/', description: 'Focus search' },
+  { keys: '⌘P', description: 'Patient lookup' },
   { keys: 'G T', description: 'Go to Today' },
   { keys: 'G I', description: 'Go to Inbox' },
   { keys: 'G S', description: 'Go to Schedule' },
@@ -63,10 +64,18 @@ export function HotkeysProvider({ children }: { children: React.ReactNode }) {
 
   useHotkeys('p', () => {
     if (Date.now() - gKeyTime.current < 600) {
-      window.location.href = '/patients'
+      window.location.href = '/lookup'
       gKeyTime.current = 0
     }
   })
+
+  useHotkeys(
+    'mod+p',
+    () => {
+      window.location.href = '/lookup'
+    },
+    { preventDefault: true }
+  )
 
   return (
     <>

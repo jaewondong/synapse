@@ -35,7 +35,7 @@ const mainNav: NavItem[] = [
   { label: 'Today', href: '/', icon: CalendarDays, shortcut: 'G T' },
   { label: 'Inbox', href: '/inbox', icon: Inbox, shortcut: 'G I' },
   { label: 'Schedule', href: '/schedule', icon: Calendar, shortcut: 'G S' },
-  { label: 'Patients', href: '/patients', icon: Users, shortcut: 'G P' },
+  { label: 'Patients', href: '/lookup', icon: Users, shortcut: 'G P' },
   { label: 'Documents', href: '/documents', icon: FileText },
   { label: 'Billing', href: '/billing', icon: CreditCard },
 ]
@@ -130,7 +130,11 @@ export function Sidebar({ collapsed }: SidebarProps) {
               key={item.href}
               item={item}
               collapsed={collapsed}
-              active={pathname === item.href}
+              active={
+                item.href === '/lookup'
+                  ? pathname === '/lookup' || pathname.startsWith('/chart')
+                  : pathname === item.href
+              }
             />
           ))}
 
