@@ -14,7 +14,8 @@
       "Bash(npx prisma *)",
       "PowerShell(npx prisma init --datasource-provider sqlite 2>&1)",
       "PowerShell(npx prisma --version 2>&1)",
-      "PowerShell(ls node_modules | Where-Object { $_.Name -eq \"dotenv\" } 2>&1)"
+      "PowerShell(ls node_modules | Where-Object { $_.Name -eq \"dotenv\" } 2>&1)",
+      "Bash(Get-ChildItem -Path \"c:\\\\Users\\\\codyp\\\\synapse\" -Force)"
     ]
   }
 }

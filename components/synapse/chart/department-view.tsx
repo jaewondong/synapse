@@ -1,3 +1,5 @@
+'use client'
+
 import * as React from 'react'
 import Link from 'next/link'
 import {
@@ -13,6 +15,9 @@ import {
 } from 'lucide-react'
 import { AuditStrip } from './audit-strip'
 import { NeurologyWidget } from './neurology-widget'
+import { DocumentList } from '@/components/synapse/documents/document-list'
+import { UploadDialog } from '@/components/synapse/documents/upload-dialog'
+import { formatDateOnly } from '@/lib/utils'
 import type { Department, Problem, Encounter, SeizureLog } from '@/lib/types/chart'
 
 const deptIcons: Record<Exclude<Department, 'timeline'>, React.ElementType> = {
@@ -35,10 +40,6 @@ const deptLabels: Record<Exclude<Department, 'timeline'>, string> = {
   immunizations: 'Immunizations',
   'primary-care': 'Primary care',
   documents: 'Documents',
-}
-
-function formatDate(iso: string): string {
-  return new Date(iso).toLocaleDateString('en-US', { month: '2-digit', day: '2-digit', year: 'numeric' })
 }
 
 const problemStatusColors: Record<Problem['status'], string> = {
@@ -67,13 +68,15 @@ function ActiveProblems({ problems }: { problems: Problem[] }) {
               <div className="min-w-0 mr-4">
                 <p className="font-medium truncate">{p.name}</p>
                 <p className="text-[11px] text-muted-foreground mt-0.5">
-                  {p.icd10} · Onset {p.onset} · {p.context}
+                  {[p.icd10, p.onset && `Onset ${p.onset}`, p.context].filter(Boolean).join(' · ')}
                 </p>
-                <AuditStrip
-                  modifiedByType={p.modifiedByType}
-                  modifiedByAgentName={p.modifiedByAgentName}
-                  modifiedAt={p.modifiedAt}
-                />
+                {p.modifiedByType === 'agent' && (
+                  <AuditStrip
+                    modifiedByType={p.modifiedByType}
+                    modifiedByAgentName={p.modifiedByAgentName}
+                    modifiedAt={p.modifiedAt}
+                  />
+                )}
               </div>
               <span
                 className={`shrink-0 self-start rounded-lg px-2 py-0.5 text-[11px] font-medium ${problemStatusColors[p.status]}`}
@@ -108,7 +111,7 @@ function RecentEncounters({ encounters, mrn }: { encounters: Encounter[]; mrn: s
               <div className="min-w-0 mr-4">
                 <p className="font-medium truncate">{e.visitType} · {e.provider}</p>
                 <p className="text-[11px] text-muted-foreground mt-0.5">
-                  {formatDate(e.date)} · {e.summary}
+                  {formatDateOnly(e.date)} · {e.summary}
                 </p>
               </div>
               {e.status === 'complete' ? (
@@ -136,6 +139,7 @@ function RecentEncounters({ encounters, mrn }: { encounters: Encounter[]; mrn: s
 interface DepartmentViewProps {
   department: Exclude<Department, 'timeline'>
   mrn: string
+  patient?: { name: string; dob: string; age: number; sex: string }
   problems: Problem[]
   encounters: Encounter[]
   seizureLog: SeizureLog | null
@@ -143,15 +147,66 @@ interface DepartmentViewProps {
   lastVisit: string | null
 }
 
+function DocumentsView({
+  mrn,
+  patient,
+  docCount,
+}: {
+  mrn: string
+  patient?: { name: string; dob: string; age: number; sex: string }
+  docCount: number
+}) {
+  const [dialogOpen, setDialogOpen] = React.useState(false)
+  const [refreshTrigger, setRefreshTrigger] = React.useState(0)
+
+  return (
+    <div className="rounded-xl border border-black/[0.08] bg-white overflow-hidden">
+      {/* Header */}
+      <div className="flex justify-between items-center px-4 py-3.5 border-b border-black/[0.06]">
+        <div className="flex items-center gap-2">
+          <FileText className="h-[18px] w-[18px]" aria-hidden />
+          <span className="text-[15px] font-medium">Documents</span>
+        </div>
+        <span className="text-[11px] text-chart-subtle">
+          {docCount} {docCount === 1 ? 'document' : 'documents'}
+        </span>
+      </div>
+
+      <DocumentList
+        patientMrn={mrn}
+        onUploadClick={() => setDialogOpen(true)}
+        refreshTrigger={refreshTrigger}
+      />
+
+      <UploadDialog
+        open={dialogOpen}
+        onClose={() => setDialogOpen(false)}
+        prefillPatient={patient ? { mrn, ...patient } : undefined}
+        onUploaded={() => {
+          setDialogOpen(false)
+          setRefreshTrigger((n) => n + 1)
+        }}
+      />
+    </div>
+  )
+}
+
 export function DepartmentView({
   department,
   mrn,
+  patient,
   problems,
   encounters,
   seizureLog,
   encounterCount,
   lastVisit,
 }: DepartmentViewProps) {
+  if (department === 'documents') {
+    return (
+      <DocumentsView mrn={mrn} patient={patient} docCount={encounterCount} />
+    )
+  }
+
   const Icon = deptIcons[department]
   const label = deptLabels[department]
 
@@ -165,7 +220,7 @@ export function DepartmentView({
         </div>
         <span className="text-[11px] text-chart-subtle">
           {encounterCount} {encounterCount === 1 ? 'entry' : 'entries'}
-          {lastVisit ? ` · Last visit ${formatDate(lastVisit)}` : ''}
+          {lastVisit ? ` · Last visit ${formatDateOnly(lastVisit)}` : ''}
         </span>
       </div>
 

@@ -9,7 +9,13 @@ import { MedicationsCard } from './medications-card'
 import { ImagingCard } from './imaging-card'
 import { ReconciliationBanner } from './reconciliation-banner'
 import { WrongPatientGuard } from './wrong-patient-guard'
+import { useStripSourceParam } from '@/lib/hooks/use-strip-source-param'
 import type { ChartData, Department } from '@/lib/types/chart'
+
+function StripSource() {
+  useStripSourceParam()
+  return null
+}
 
 interface ChartShellProps {
   data: ChartData
@@ -36,6 +42,9 @@ export function ChartShell({ data, initialDepartment }: ChartShellProps) {
 
   return (
     <div className="mx-auto max-w-[1400px] px-4 py-4">
+      <React.Suspense fallback={null}>
+        <StripSource />
+      </React.Suspense>
       {/* Wrong-patient guard — invisible, just fires toasts */}
       <WrongPatientGuard mrn={patient.mrn} name={patient.name} dob={patient.dob} />
 
@@ -72,6 +81,7 @@ export function ChartShell({ data, initialDepartment }: ChartShellProps) {
               <DepartmentView
                 department={viewedDept as Exclude<Department, 'timeline'>}
                 mrn={patient.mrn}
+                patient={{ name: patient.name, dob: patient.dob, age: patient.age, sex: patient.sex }}
                 problems={deptProblems}
                 encounters={deptEncounters}
                 seizureLog={seizureLog}

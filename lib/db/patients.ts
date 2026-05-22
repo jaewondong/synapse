@@ -1,4 +1,5 @@
 import { prisma } from '@/lib/db/prisma'
+import { createServerClient } from '@/lib/supabase/server'
 import type {
   ChartData,
   ChartPatient,
@@ -232,7 +233,7 @@ function buildSeizureLog(
   }
 }
 
-function buildDepartmentCounts(p: PatientWithRelations): DepartmentCounts {
+function buildDepartmentCounts(p: PatientWithRelations, documentCount = 0): DepartmentCounts {
   const DEPT_MAP: Record<string, keyof Omit<DepartmentCounts, 'timeline'>> = {
     neurology: 'neurology',
     cardiology: 'cardiology',
@@ -252,7 +253,7 @@ function buildDepartmentCounts(p: PatientWithRelations): DepartmentCounts {
     medications: p.medications.filter((m) => m.active).length,
     immunizations: 0,
     'primary-care': 0,
-    documents: 0,
+    documents: documentCount,
   }
 
   for (const enc of p.encounters) {
@@ -270,8 +271,25 @@ function buildDepartmentCounts(p: PatientWithRelations): DepartmentCounts {
   return { ...counts, timeline: 'all' }
 }
 
+async function getDocumentCount(mrn: string): Promise<number> {
+  try {
+    const supabase = createServerClient()
+    const { count } = await supabase
+      .from('patient_documents')
+      .select('id', { count: 'exact', head: true })
+      .eq('patient_mrn', mrn)
+      .is('deleted_at', null)
+    return count ?? 0
+  } catch {
+    return 0
+  }
+}
+
 export async function getChartData(mrn: string): Promise<ChartData | null> {
-  const p = await findPatientByMrn(mrn)
+  const [p, docCount] = await Promise.all([
+    findPatientByMrn(mrn),
+    getDocumentCount(mrn),
+  ])
   if (!p) return null
 
   const primaryInsurance = p.insurances.find((i) => i.slot === 'primary') ?? p.insurances[0]
@@ -302,7 +320,7 @@ export async function getChartData(mrn: string): Promise<ChartData | null> {
       .sort((a, b) => (b.studyDate ?? '').localeCompare(a.studyDate ?? ''))
       .map(mapImagingStudy),
     reconciliationPrompts: p.reconciliationPrompts.map(mapReconciliationPrompt),
-    departmentCounts: buildDepartmentCounts(p),
+    departmentCounts: buildDepartmentCounts(p, docCount),
   }
 }
 

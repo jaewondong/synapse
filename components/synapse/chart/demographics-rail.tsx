@@ -85,11 +85,13 @@ function InsuranceCard({ insurance }: { insurance: Insurance }) {
       >
         {eligibilityDot[insurance.eligibility]}
       </span>
-      <AuditStrip
-        modifiedByType={insurance.modifiedByType}
-        modifiedByAgentName={insurance.modifiedByAgentName}
-        modifiedAt={insurance.modifiedAt}
-      />
+      {insurance.modifiedByType === 'agent' && (
+        <AuditStrip
+          modifiedByType={insurance.modifiedByType}
+          modifiedByAgentName={insurance.modifiedByAgentName}
+          modifiedAt={insurance.modifiedAt}
+        />
+      )}
     </Card>
   )
 }

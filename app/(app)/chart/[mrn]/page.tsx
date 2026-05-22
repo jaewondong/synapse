@@ -1,16 +1,43 @@
-import { notFound } from 'next/navigation'
-import { ChartShell } from '@/components/synapse/chart/chart-shell'
-import { getChartData } from '@/lib/db/patients'
+import { notFound, redirect } from 'next/navigation'
+import { prisma } from '@/lib/db/prisma'
+import type { Department } from '@/lib/types/chart'
 
-export default async function ChartPage({
+const DEPARTMENT_ORDER: Exclude<Department, 'timeline'>[] = [
+  'neurology',
+  'cardiology',
+  'imaging',
+  'labs',
+  'medications',
+  'immunizations',
+  'primary-care',
+  'documents',
+]
+
+// Maps the stored primaryDepartment string (e.g. "Neurology", "Primary Care") to a valid
+// URL segment. Falls back to 'neurology' if unrecognized.
+function toDepartmentSlug(raw: string): Exclude<Department, 'timeline'> {
+  const normalized = raw.toLowerCase().replace(/\s+/g, '-')
+  return (DEPARTMENT_ORDER.find((d) => d === normalized) ?? 'neurology')
+}
+
+export default async function ChartDefaultPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ mrn: string }>
+  searchParams: Promise<{ source?: string }>
 }) {
-  const { mrn } = await params
-  const data = await getChartData(mrn)
+  const [{ mrn }, { source }] = await Promise.all([params, searchParams])
 
-  if (!data) notFound()
+  const patient = await prisma.patient.findUnique({
+    where: { mrn },
+    select: { primaryDepartment: true },
+  })
 
-  return <ChartShell data={data} initialDepartment={null} />
+  if (!patient) notFound()
+
+  const dept = toDepartmentSlug(patient.primaryDepartment)
+  const qs = source ? `?source=${encodeURIComponent(source)}` : ''
+
+  redirect(`/chart/${mrn}/${dept}${qs}`)
 }

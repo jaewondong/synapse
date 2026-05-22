@@ -1,10 +1,7 @@
 import * as React from 'react'
 import { ScanLine, ExternalLink } from 'lucide-react'
+import { formatDateOnly } from '@/lib/utils'
 import type { ImagingStudy } from '@/lib/types/chart'
-
-function formatDate(iso: string): string {
-  return new Date(iso).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
-}
 
 interface ImagingCardProps {
   studies: ImagingStudy[]
@@ -32,7 +29,7 @@ export function ImagingCard({ studies }: ImagingCardProps) {
               <div className="min-w-0 mr-4">
                 <p className="font-medium truncate">{s.type}</p>
                 <p className="text-[11px] text-muted-foreground mt-0.5">
-                  {formatDate(s.date)} · {s.provider}
+                  {formatDateOnly(s.date)} · {s.provider}
                 </p>
                 <p className="text-[11px] text-muted-foreground mt-0.5 italic">{s.result}</p>
               </div>

@@ -23,7 +23,23 @@
       "Bash(node -e \"const Database = require\\('better-sqlite3'\\); const db = new Database\\('synapse.db'\\); const p = db.prepare\\('SELECT firstName, lastName FROM Patient LIMIT 3'\\).all\\(\\); console.log\\(JSON.stringify\\(p\\)\\)\")",
       "Bash(curl -s \"http://localhost:3000/api/patients/search?name=Anderson\" -w \"\\\\nHTTP Status: %{http_code}\\\\nContent-Length: %{size_download}\")",
       "Bash(Start-Sleep -Seconds 3)",
-      "Bash(curl -s \"http://localhost:3000/api/patients/search?name=Anderson\")"
+      "Bash(curl -s \"http://localhost:3000/api/patients/search?name=Anderson\")",
+      "Bash(Get-ChildItem -Path .)",
+      "Bash(Select-Object Name, FullName)",
+      "Read(//c/Users/codypy/**)",
+      "Bash(2>/dev/null)",
+      "Bash(sqlite3 c:/Users/codyp/synapse/synapse.db \"SELECT mrn, firstName || ' ' || lastName AS name FROM Patient ORDER BY mrn LIMIT 20;\")",
+      "Bash(sqlite3 c:/Users/codyp/synapse/prisma/synapse.db \"SELECT mrn FROM Patient LIMIT 20;\")",
+      "Bash(sqlite3 c:/Users/codyp/synapse/synapse.db \"SELECT mrn, firstName || ' ' || lastName AS name FROM Patient ORDER BY mrn;\")",
+      "Bash(node -e ' *)",
+      "Bash(npx supabase *)",
+      "Bash(node -e \"require\\('dotenv'\\).config\\(\\); console.log\\('URL:', process.env.NEXT_PUBLIC_SUPABASE_URL?.slice\\(0,30\\)\\)\")",
+      "Bash(node -e \"require\\('./node_modules/pg/lib/index.js'\\); console.log\\('pg available'\\)\")",
+      "Bash(Get-ChildItem -Path \"c:\\\\Users\\\\codyp\\\\synapse\" -Directory)",
+      "Bash(Select-Object Name)",
+      "PowerShell(Get-ChildItem -Path \"c:\\\\Users\\\\codyp\\\\synapse\" | Where-Object { $_.PSIsContainer } | Select-Object Name)",
+      "Bash(node -e 'const { PrismaClient } = require\\('\\\\''./lib/generated/prisma'\\\\''\\); const p = new PrismaClient\\(\\); p.patient.findFirst\\({ select: { mrn: true, firstName: true, lastName: true } }\\).then\\(r => console.log\\(r\\)\\).finally\\(\\(\\) => p.$disconnect\\(\\)\\)')",
+      "Bash(sqlite3 c:\\\\Users\\\\codyp\\\\synapse\\\\synapse.db \"SELECT mrn, firstName, lastName FROM Patient LIMIT 5;\")"
     ]
   }
 }

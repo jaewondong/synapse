@@ -1,6 +1,7 @@
 'use client'
 
 import * as React from 'react'
+import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useHotkeys } from 'react-hotkeys-hook'
 import { AlertTriangle, MessageSquare, CalendarPlus, NotebookPen } from 'lucide-react'
@@ -23,13 +24,21 @@ export function PatientHeader({ patient }: PatientHeaderProps) {
   const router = useRouter()
   const isDeceased = patient.status === 'Deceased'
 
+  const messageHref = `/inbox?category=messages&patient_mrn=${patient.mrn}&compose=auto&return_to=${encodeURIComponent(`/chart/${patient.mrn}`)}`
+
   const handleSchedule = React.useCallback(() => {
     if (isDeceased) return
     const returnTo = encodeURIComponent(`/chart/${patient.mrn}`)
     router.push(`/schedule?patient_mrn=${patient.mrn}&intent=book&return_to=${returnTo}`)
   }, [isDeceased, patient.mrn, router])
 
+  const handleMessage = React.useCallback(() => {
+    if (isDeceased) return
+    router.push(messageHref)
+  }, [isDeceased, messageHref, router])
+
   useHotkeys('s', handleSchedule, { enableOnFormTags: false, enabled: !isDeceased }, [handleSchedule])
+  useHotkeys('m', handleMessage, { enableOnFormTags: false, enabled: !isDeceased }, [handleMessage])
 
   const statusColors = isDeceased
     ? 'bg-chart-danger-bg text-chart-danger-text'
@@ -77,12 +86,26 @@ export function PatientHeader({ patient }: PatientHeaderProps) {
 
       {/* Quick actions */}
       <div className="flex items-center gap-2 shrink-0">
-        <QuickAction
-          icon={<MessageSquare className="h-[13px] w-[13px]" />}
-          label="Message"
-          disabled={isDeceased}
-          disabledReason="Action disabled for deceased patient"
-        />
+        {/* Message — Link so Cmd/middle-click opens in new tab */}
+        {isDeceased ? (
+          <span
+            title="Messaging disabled for deceased patient"
+            aria-disabled="true"
+            className="inline-flex items-center gap-1 rounded-lg border border-black/[0.08] px-2.5 py-1.5 text-xs font-medium opacity-40 cursor-not-allowed"
+          >
+            <MessageSquare className="h-[13px] w-[13px]" />
+            Message
+          </span>
+        ) : (
+          <Link
+            href={messageHref}
+            className="inline-flex items-center gap-1 rounded-lg border border-black/[0.08] px-2.5 py-1.5 text-xs font-medium transition-colors hover:bg-chart-surface"
+          >
+            <MessageSquare className="h-[13px] w-[13px]" />
+            Message
+          </Link>
+        )}
+
         <QuickAction
           icon={<CalendarPlus className="h-[13px] w-[13px]" />}
           label="Schedule"

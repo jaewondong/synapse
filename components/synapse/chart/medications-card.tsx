@@ -1,11 +1,8 @@
 import * as React from 'react'
 import { Pill } from 'lucide-react'
 import { AuditStrip } from './audit-strip'
+import { formatDateOnly } from '@/lib/utils'
 import type { Medication } from '@/lib/types/chart'
-
-function formatDate(iso: string): string {
-  return new Date(iso).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
-}
 
 interface MedicationsCardProps {
   medications: Medication[]
@@ -35,13 +32,15 @@ export function MedicationsCard({ medications }: MedicationsCardProps) {
                 <span className="text-muted-foreground text-xs">{m.dose} · {m.frequency}</span>
               </div>
               <p className="text-[11px] text-muted-foreground mt-0.5">
-                Prescribed by {m.prescriber} · Started {formatDate(m.startDate)}
+                Prescribed by {m.prescriber} · Started {formatDateOnly(m.startDate)}
               </p>
-              <AuditStrip
-                modifiedByType={m.modifiedByType}
-                modifiedByAgentName={m.modifiedByAgentName}
-                modifiedAt={m.modifiedAt}
-              />
+              {m.modifiedByType === 'agent' && (
+                <AuditStrip
+                  modifiedByType={m.modifiedByType}
+                  modifiedByAgentName={m.modifiedByAgentName}
+                  modifiedAt={m.modifiedAt}
+                />
+              )}
             </div>
           ))}
         </div>

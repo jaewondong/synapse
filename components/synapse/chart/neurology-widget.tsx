@@ -1,9 +1,6 @@
 import * as React from 'react'
+import { formatDateOnly } from '@/lib/utils'
 import type { SeizureLog } from '@/lib/types/chart'
-
-function formatDate(iso: string): string {
-  return new Date(iso).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
-}
 
 interface NeurologyWidgetProps {
   seizureLog: SeizureLog
@@ -35,7 +32,7 @@ export function NeurologyWidget({ seizureLog }: NeurologyWidgetProps) {
         <div className="flex justify-between">
           <span className="text-muted-foreground">Last event</span>
           <span>
-            {formatDate(seizureLog.lastEvent.date)} · {seizureLog.lastEvent.duration} ·{' '}
+            {formatDateOnly(seizureLog.lastEvent.date)} · {seizureLog.lastEvent.duration} ·{' '}
             {seizureLog.lastEvent.type}
           </span>
         </div>

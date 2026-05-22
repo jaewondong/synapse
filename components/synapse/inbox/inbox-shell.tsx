@@ -5,14 +5,13 @@ import { CategoryRail, type InboxCategory } from './category-rail'
 import { AgentReviewList, AgentReviewListSkeleton } from './agent-review-list'
 import {
   CategoryStubList,
-  messagesToRows,
   resultsToRows,
   tasksToRows,
   signaturesToRows,
 } from './category-stub-list'
+import { MessagesTab } from '@/components/synapse/messages/messages-tab'
 import { allAgentActions } from '@/lib/mock/agent-actions'
 import {
-  mockMessages,
   mockResults,
   mockTasks,
   mockSignatures,
@@ -21,6 +20,10 @@ import {
 
 interface InboxShellProps {
   category: InboxCategory
+  selectedThreadId: string | null
+  patientMrn: string | null
+  compose: string | null
+  returnTo: string | null
 }
 
 const counts = {
@@ -38,7 +41,7 @@ const totalUnread =
   mockInboxCounts.tasks +
   mockInboxCounts.signatures
 
-export function InboxShell({ category }: InboxShellProps) {
+export function InboxShell({ category, selectedThreadId, patientMrn, compose, returnTo }: InboxShellProps) {
   return (
     <div className="flex flex-col h-full">
       {/* Page header */}
@@ -86,11 +89,14 @@ export function InboxShell({ category }: InboxShellProps) {
           )}
 
           {category === 'messages' && (
-            <CategoryStubList
-              categoryLabel="Messages"
-              rows={messagesToRows(mockMessages)}
-              totalCount={mockInboxCounts.messages}
-            />
+            <Suspense fallback={null}>
+              <MessagesTab
+                selectedThreadId={selectedThreadId}
+                patientMrn={patientMrn}
+                compose={compose}
+                returnTo={returnTo}
+              />
+            </Suspense>
           )}
 
           {category === 'results' && (
