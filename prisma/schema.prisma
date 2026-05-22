@@ -7,6 +7,206 @@ datasource db {
   provider = "sqlite"
 }
 
+model Patient {
+  id                           String   @id @default(cuid())
+  mrn                          String   @unique
+  firstName                    String
+  lastName                     String
+  preferredName                String?
+  sex                          String
+  dateOfBirth                  String
+  age                          Int
+  pediatric                    Boolean  @default(false)
+  status                       String   @default("Active")
+  preferredLanguage            String?
+  pronouns                     String?
+  addressStreet                String?
+  addressCity                  String?
+  addressState                 String?
+  addressZip                   String?
+  phone                        String?
+  email                        String?
+  maritalStatus                String?
+  employer                     String?
+  emergencyContactName         String?
+  emergencyContactRelationship String?
+  emergencyContactPhone        String?
+  primaryDepartment            String
+  pcpName                      String?
+  pcpProviderId                String?
+  primaryProviderName          String?
+  primaryProviderId            String?
+  lastSeenDate                 String?
+  registrationDate             String?
+  modifiedByType               String?
+  modifiedByAgentName          String?
+  modifiedAt                   String?
+  createdAt                    DateTime @default(now())
+
+  insurances            PatientInsurance[]
+  allergies             PatientAllergy[]
+  problems              PatientProblem[]
+  medications           PatientMedication[]
+  encounters            PatientEncounter[]
+  imagingStudies        PatientImagingStudy[]
+  seizureEvents         PatientSeizureEvent[]
+  careTeamMembers       PatientCareTeamMember[]
+  appointments          PatientAppointment[]
+  reconciliationPrompts PatientReconciliationPrompt[]
+
+  @@index([lastName, firstName])
+  @@index([dateOfBirth])
+}
+
+model PatientInsurance {
+  id                  String  @id @default(cuid())
+  patientId           String
+  patient             Patient @relation(fields: [patientId], references: [id], onDelete: Cascade)
+  slot                String
+  payerName           String
+  payerShort          String?
+  memberId            String?
+  groupNumber         String?
+  eligibilityStatus   String  @default("Active")
+  lastVerifiedAt      String?
+  verifiedByType      String?
+  verifiedByAgentName String?
+  effectiveStart      String?
+  effectiveEnd        String?
+
+  @@index([patientId])
+}
+
+model PatientAllergy {
+  id                  String  @id @default(cuid())
+  patientId           String
+  patient             Patient @relation(fields: [patientId], references: [id], onDelete: Cascade)
+  substance           String
+  reaction            String?
+  severity            String?
+  yearIdentified      Int?
+  active              Boolean @default(true)
+  modifiedByType      String?
+  modifiedByAgentName String?
+
+  @@index([patientId])
+}
+
+model PatientProblem {
+  id                  String  @id @default(cuid())
+  patientId           String
+  patient             Patient @relation(fields: [patientId], references: [id], onDelete: Cascade)
+  name                String
+  icd10               String?
+  status              String
+  department          String?
+  onsetYear           Int?
+  modifiedByType      String?
+  modifiedByAgentName String?
+
+  @@index([patientId])
+  @@index([patientId, department])
+}
+
+model PatientMedication {
+  id                  String  @id @default(cuid())
+  patientId           String
+  patient             Patient @relation(fields: [patientId], references: [id], onDelete: Cascade)
+  name                String
+  dose                String?
+  frequency           String?
+  indication          String?
+  prescribingProvider String?
+  startedYear         Int?
+  active              Boolean @default(true)
+  modifiedByType      String?
+  modifiedByAgentName String?
+
+  @@index([patientId])
+}
+
+model PatientEncounter {
+  id                  String  @id @default(cuid())
+  patientId           String
+  patient             Patient @relation(fields: [patientId], references: [id], onDelete: Cascade)
+  encounterDate       String?
+  visitType           String?
+  department          String?
+  providerName        String?
+  summary             String?
+  status              String  @default("complete")
+  modifiedByType      String?
+  modifiedByAgentName String?
+
+  @@index([patientId])
+  @@index([patientId, department])
+}
+
+model PatientImagingStudy {
+  id                  String  @id @default(cuid())
+  patientId           String
+  patient             Patient @relation(fields: [patientId], references: [id], onDelete: Cascade)
+  studyName           String?
+  studyDate           String?
+  finding             String?
+  department          String?
+  status              String  @default("complete")
+  modifiedByType      String?
+  modifiedByAgentName String?
+
+  @@index([patientId])
+}
+
+model PatientSeizureEvent {
+  id              String  @id @default(cuid())
+  patientId       String
+  patient         Patient @relation(fields: [patientId], references: [id], onDelete: Cascade)
+  eventDate       String?
+  durationSeconds Int?
+  type            String?
+  notes           String?
+
+  @@index([patientId])
+}
+
+model PatientCareTeamMember {
+  id           String  @id @default(cuid())
+  patientId    String
+  patient      Patient @relation(fields: [patientId], references: [id], onDelete: Cascade)
+  name         String
+  role         String?
+  relationship String?
+
+  @@index([patientId])
+}
+
+model PatientAppointment {
+  id              String  @id @default(cuid())
+  patientId       String
+  patient         Patient @relation(fields: [patientId], references: [id], onDelete: Cascade)
+  appointmentDate String?
+  appointmentTime String?
+  visitType       String?
+  providerName    String?
+  noShowRisk      String?
+  status          String  @default("Scheduled")
+
+  @@index([patientId])
+}
+
+model PatientReconciliationPrompt {
+  id        String  @id @default(cuid())
+  patientId String
+  patient   Patient @relation(fields: [patientId], references: [id], onDelete: Cascade)
+  type      String?
+  agentName String?
+  createdAt String?
+  message   String?
+  resolved  Boolean @default(false)
+
+  @@index([patientId])
+}
+
 model AgentActionRecord {
   id               String     @id
   agentName        String

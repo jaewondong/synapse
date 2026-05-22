@@ -3,6 +3,7 @@
 import Link from 'next/link'
 import { ArrowRight, Zap } from 'lucide-react'
 import { cn } from '@/lib/utils'
+import { PatientRowLink } from '@/components/synapse/patient-row-link'
 import type { Appointment } from '@/lib/types/patient'
 
 interface ScheduleCardProps {
@@ -60,31 +61,35 @@ export function ScheduleCard({ appointments }: ScheduleCardProps) {
 
       <div className="divide-y divide-border">
         {appointments.map((appt) => (
-          <button
-            key={appt.id}
-            className="w-full flex items-center gap-3 px-5 py-2.5 hover:bg-muted/50 transition-colors text-left"
-            onClick={() => console.log('open chart', appt.patient.mrn)}
-          >
+          <div key={appt.id} className="flex items-center gap-3 px-5 py-2.5">
             <span className="w-12 shrink-0 text-xs font-mono tabular-nums text-muted-foreground">
               {appt.time}
             </span>
-            <AvatarCircle initials={appt.patient.initials} />
-            <div className="flex-1 min-w-0">
-              <div className="flex items-center gap-1.5">
-                <span className="text-sm font-semibold truncate">{appt.patient.name}</span>
-                {appt.hasAgentPreppedChart && (
-                  <Zap className="h-3 w-3 text-accent shrink-0" aria-label="Agent-prepped chart ready" />
-                )}
-                <span className="text-xs text-muted-foreground shrink-0">
-                  MRN {appt.patient.mrn} · {appt.patient.age}{appt.patient.sex}
-                </span>
+            <PatientRowLink
+              mrn={appt.patient.mrn}
+              patientName={appt.patient.name}
+              source="today_schedule"
+              className="flex-1 min-w-0 px-2 py-1 -mx-2"
+            >
+              <AvatarCircle initials={appt.patient.initials} />
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center gap-1.5">
+                  <span className="text-sm font-semibold truncate">{appt.patient.name}</span>
+                  {appt.hasAgentPreppedChart && (
+                    <Zap className="h-3 w-3 text-accent shrink-0" aria-label="Agent-prepped chart ready" />
+                  )}
+                  <span className="text-xs text-muted-foreground shrink-0">
+                    MRN {appt.patient.mrn} · {appt.patient.age}{appt.patient.sex}
+                  </span>
+                </div>
+                <p className="text-xs text-muted-foreground truncate">{appt.visitType}</p>
               </div>
-              <p className="text-xs text-muted-foreground truncate">{appt.visitType}</p>
-            </div>
+            </PatientRowLink>
+            {/* Status pill is a sibling of the link — clicking it does not navigate */}
             <div className="shrink-0">
               <StatusPill status={appt.status} riskLevel={appt.noShowRiskLevel} />
             </div>
-          </button>
+          </div>
         ))}
       </div>
 

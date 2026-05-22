@@ -1,13 +1,16 @@
 'use client'
 
 import { formatRelativeTime } from '@/lib/utils'
+import { PatientRowLink } from '@/components/synapse/patient-row-link'
 import type { RecentPatient } from '@/lib/types/patient'
 
 function PatientRow({ patient }: { patient: RecentPatient }) {
   return (
-    <button
-      className="w-full flex items-center gap-3 py-2.5 hover:bg-muted/50 rounded-lg px-2 transition-colors text-left -mx-2"
-      onClick={() => console.log('open chart', patient.mrn)}
+    <PatientRowLink
+      mrn={patient.mrn}
+      patientName={patient.name}
+      source="today_recent_charts"
+      className="w-full py-2.5 px-2 -mx-2"
     >
       <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-accent/15 text-accent text-xs font-semibold">
         {patient.initials}
@@ -19,7 +22,7 @@ function PatientRow({ patient }: { patient: RecentPatient }) {
       <span className="text-xs text-muted-foreground shrink-0">
         {formatRelativeTime(patient.lastOpened)}
       </span>
-    </button>
+    </PatientRowLink>
   )
 }
 

@@ -19,7 +19,7 @@ export const mockAppointments: Appointment[] = [
   {
     id: 'appt-1',
     time: '8:00',
-    patient: { id: 'p1', name: 'Maria Chen', mrn: '4471829', age: 34, sex: 'F', initials: 'MC' },
+    patient: { id: 'p1', name: 'Sandra Perez', mrn: '00432303', age: 32, sex: 'M', initials: 'SP' },
     visitType: 'Follow-up: epilepsy',
     status: 'checked-in',
     hasAgentPreppedChart: true,
@@ -27,7 +27,7 @@ export const mockAppointments: Appointment[] = [
   {
     id: 'appt-2',
     time: '8:45',
-    patient: { id: 'p2', name: 'James Okonkwo', mrn: '3309812', age: 52, sex: 'M', initials: 'JO' },
+    patient: { id: 'p2', name: 'Carol Rodriguez', mrn: '00430522', age: 36, sex: 'F', initials: 'CR' },
     visitType: 'Infusion: Tysabri',
     status: 'scheduled',
     hasAgentPreppedChart: true,
@@ -35,7 +35,7 @@ export const mockAppointments: Appointment[] = [
   {
     id: 'appt-3',
     time: '9:30',
-    patient: { id: 'p3', name: 'Aditi Rao', mrn: '7712938', age: 41, sex: 'F', initials: 'AR' },
+    patient: { id: 'p3', name: 'Robert Hernandez', mrn: '00431892', age: 59, sex: 'M', initials: 'RH' },
     visitType: 'Follow-up: MS',
     status: 'checked-in',
     hasAgentPreppedChart: false,
@@ -43,7 +43,7 @@ export const mockAppointments: Appointment[] = [
   {
     id: 'appt-4',
     time: '10:15',
-    patient: { id: 'p4', name: 'Marcus Bell', mrn: '8823741', age: 67, sex: 'M', initials: 'MB' },
+    patient: { id: 'p4', name: 'Daniel Nguyen', mrn: '00432988', age: 31, sex: 'M', initials: 'DN' },
     visitType: 'Post-op f/u: DBS',
     status: 'no-show-risk',
     hasAgentPreppedChart: true,
@@ -52,7 +52,7 @@ export const mockAppointments: Appointment[] = [
   {
     id: 'appt-5',
     time: '11:00',
-    patient: { id: 'p5', name: 'Yuki Tanaka', mrn: '9912034', age: 29, sex: 'F', initials: 'YT' },
+    patient: { id: 'p5', name: 'Nancy Singh', mrn: '00433536', age: 52, sex: 'F', initials: 'NS' },
     visitType: 'Telehealth f/u: migraine',
     status: 'no-show-risk',
     hasAgentPreppedChart: false,
@@ -61,7 +61,7 @@ export const mockAppointments: Appointment[] = [
   {
     id: 'appt-6',
     time: '12:30',
-    patient: { id: 'p6', name: 'Sofia Hernandez', mrn: '6634521', age: 45, sex: 'F', initials: 'SH' },
+    patient: { id: 'p6', name: 'Diego Davis', mrn: '00429700', age: 77, sex: 'M', initials: 'DD' },
     visitType: 'Follow-up: epilepsy',
     status: 'scheduled',
     hasAgentPreppedChart: true,
@@ -69,7 +69,7 @@ export const mockAppointments: Appointment[] = [
   {
     id: 'appt-7',
     time: '1:30',
-    patient: { id: 'p7', name: 'David Park', mrn: '5501234', age: 58, sex: 'M', initials: 'DP' },
+    patient: { id: 'p7', name: 'Thomas Chen', mrn: '00431344', age: 43, sex: 'F', initials: 'TC' },
     visitType: 'New consult: movement disorder',
     status: 'scheduled',
     hasAgentPreppedChart: true,
@@ -77,7 +77,7 @@ export const mockAppointments: Appointment[] = [
   {
     id: 'appt-8',
     time: '3:00',
-    patient: { id: 'p8', name: 'Fatima Al-Rashid', mrn: '2287643', age: 37, sex: 'F', initials: 'FA' },
+    patient: { id: 'p8', name: 'Patricia Anderson', mrn: '00434358', age: 33, sex: 'F', initials: 'PA' },
     visitType: 'Telehealth f/u: migraine',
     status: 'scheduled',
     hasAgentPreppedChart: false,
@@ -136,11 +136,11 @@ export const mockAgentActivity: AgentActivityItem[] = [
 ]
 
 export const mockRecentPatients: RecentPatient[] = [
-  { id: 'p1', name: 'Maria Chen', mrn: '4471829', age: 34, sex: 'F', initials: 'MC', lastOpened: '2026-05-18T07:45:00Z' },
-  { id: 'p4', name: 'Marcus Bell', mrn: '8823741', age: 67, sex: 'M', initials: 'MB', lastOpened: '2026-05-17T16:20:00Z' },
-  { id: 'p3', name: 'Aditi Rao', mrn: '7712938', age: 41, sex: 'F', initials: 'AR', lastOpened: '2026-05-17T11:05:00Z' },
-  { id: 'p6', name: 'Sofia Hernandez', mrn: '6634521', age: 45, sex: 'F', initials: 'SH', lastOpened: '2026-05-16T15:30:00Z' },
-  { id: 'p7', name: 'David Park', mrn: '5501234', age: 58, sex: 'M', initials: 'DP', lastOpened: '2026-05-16T09:00:00Z' },
+  { id: 'p1', name: 'Sandra Perez', mrn: '00432303', age: 32, sex: 'M', initials: 'SP', lastOpened: '2026-05-18T07:45:00Z' },
+  { id: 'p4', name: 'Daniel Nguyen', mrn: '00432988', age: 31, sex: 'M', initials: 'DN', lastOpened: '2026-05-17T16:20:00Z' },
+  { id: 'p3', name: 'Carol Rodriguez', mrn: '00430522', age: 36, sex: 'F', initials: 'CR', lastOpened: '2026-05-17T11:05:00Z' },
+  { id: 'p6', name: 'Nancy Singh', mrn: '00433536', age: 52, sex: 'F', initials: 'NS', lastOpened: '2026-05-16T15:30:00Z' },
+  { id: 'p7', name: 'Robert Hernandez', mrn: '00431892', age: 59, sex: 'M', initials: 'RH', lastOpened: '2026-05-16T09:00:00Z' },
 ]
 
 export const mockStats = {

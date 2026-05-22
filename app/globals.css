@@ -20,6 +20,26 @@
   --muted-foreground: hsl(215 16% 47%);
   --accent: hsl(210 100% 56%);
   --accent-foreground: #ffffff;
+
+  /* Chart surface tokens */
+  --chart-surface: #F5F4EF;
+  --chart-raised: #FAF9F5;
+  --chart-subtle: #999999;
+  --chart-border-light: rgba(0, 0, 0, 0.08);
+  --chart-border-medium: rgba(0, 0, 0, 0.15);
+
+  /* Chart semantic colors */
+  --chart-info-bg: #E6F1FB;
+  --chart-info-text: #0C447C;
+  --chart-success-bg: #EAF3DE;
+  --chart-success-text: #27500A;
+  --chart-warning-bg: #FAEEDA;
+  --chart-warning-text: #633806;
+  --chart-warning-border: #EF9F27;
+  --chart-danger-bg: #FCEBEB;
+  --chart-danger-text: #791F1F;
+  --chart-neutral-bg: #F1EFE8;
+  --chart-neutral-text: #2C2C2A;
 }
 
 @theme inline {
@@ -40,6 +60,22 @@
   --color-accent-foreground: var(--accent-foreground);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
+
+  /* Chart tokens */
+  --color-chart-surface: var(--chart-surface);
+  --color-chart-raised: var(--chart-raised);
+  --color-chart-subtle: var(--chart-subtle);
+  --color-chart-info-bg: var(--chart-info-bg);
+  --color-chart-info-text: var(--chart-info-text);
+  --color-chart-success-bg: var(--chart-success-bg);
+  --color-chart-success-text: var(--chart-success-text);
+  --color-chart-warning-bg: var(--chart-warning-bg);
+  --color-chart-warning-text: var(--chart-warning-text);
+  --color-chart-warning-border: var(--chart-warning-border);
+  --color-chart-danger-bg: var(--chart-danger-bg);
+  --color-chart-danger-text: var(--chart-danger-text);
+  --color-chart-neutral-bg: var(--chart-neutral-bg);
+  --color-chart-neutral-text: var(--chart-neutral-text);
 }
 
 @media (prefers-color-scheme: dark) {
