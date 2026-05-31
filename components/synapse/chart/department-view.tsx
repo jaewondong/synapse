@@ -15,10 +15,14 @@ import {
 } from 'lucide-react'
 import { AuditStrip } from './audit-strip'
 import { NeurologyWidget } from './neurology-widget'
+import { CardiologyView } from '@/components/synapse/cardiology/CardiologyView'
+import { LabsOrderingView } from '@/components/synapse/labs/LabsOrderingView'
 import { DocumentList } from '@/components/synapse/documents/document-list'
 import { UploadDialog } from '@/components/synapse/documents/upload-dialog'
 import { formatDateOnly } from '@/lib/utils'
 import type { Department, Problem, Encounter, SeizureLog } from '@/lib/types/chart'
+import type { CardiacData } from '@/lib/types/cardiology'
+import type { LabsData } from '@/lib/types/labs'
 
 const deptIcons: Record<Exclude<Department, 'timeline'>, React.ElementType> = {
   neurology: Brain,
@@ -143,6 +147,8 @@ interface DepartmentViewProps {
   problems: Problem[]
   encounters: Encounter[]
   seizureLog: SeizureLog | null
+  cardiacData?: CardiacData | null
+  labsData?: LabsData | null
   encounterCount: number
   lastVisit: string | null
 }
@@ -198,9 +204,31 @@ export function DepartmentView({
   problems,
   encounters,
   seizureLog,
+  cardiacData,
+  labsData,
   encounterCount,
   lastVisit,
 }: DepartmentViewProps) {
+  if (department === 'labs' && labsData) {
+    return (
+      <div className="rounded-xl border border-black/[0.08] bg-white px-4 py-3.5">
+        <div className="flex justify-between items-center mb-1">
+          <div className="flex items-center gap-2">
+            <FlaskConical className="h-[18px] w-[18px]" aria-hidden />
+            <span className="text-[15px] font-medium">Labs</span>
+          </div>
+          <span className="text-[11px] text-chart-subtle">
+            {[
+              `${labsData.orders.filter((o) => o.status === 'pended').length} pending`,
+              `${labsData.catalog.length} tests in catalog`,
+            ].join(' · ')}
+          </span>
+        </div>
+        <LabsOrderingView labsData={labsData} mrn={mrn} problems={problems} />
+      </div>
+    )
+  }
+
   if (department === 'documents') {
     return (
       <DocumentsView mrn={mrn} patient={patient} docCount={encounterCount} />
@@ -219,21 +247,32 @@ export function DepartmentView({
           <span className="text-[15px] font-medium">{label}</span>
         </div>
         <span className="text-[11px] text-chart-subtle">
-          {encounterCount} {encounterCount === 1 ? 'entry' : 'entries'}
-          {lastVisit ? ` · Last visit ${formatDateOnly(lastVisit)}` : ''}
+          {department === 'cardiology' ? (
+            [
+              `${problems.filter((p) => p.status !== 'Resolved').length} problems`,
+              `${encounters.length} encounters`,
+              lastVisit ? `Last visit ${formatDateOnly(lastVisit)}` : null,
+            ]
+              .filter(Boolean)
+              .join(' · ')
+          ) : (
+            <>
+              {encounterCount} {encounterCount === 1 ? 'entry' : 'entries'}
+              {lastVisit ? ` · Last visit ${formatDateOnly(lastVisit)}` : ''}
+            </>
+          )}
         </span>
       </div>
 
       <ActiveProblems problems={problems} />
       <RecentEncounters encounters={encounters} mrn={mrn} />
 
-      {/* Neurology-specific specialty data */}
+      {/* Specialty data */}
       {department === 'neurology' && seizureLog && (
         <NeurologyWidget seizureLog={seizureLog} />
       )}
-      {department !== 'neurology' && (
-        // TODO: specialty widgets per department (v1.5+ scope)
-        <div />
+      {department === 'cardiology' && cardiacData && (
+        <CardiologyView cardiacData={cardiacData} />
       )}
 
       {/* TODO: orders & results in scope */}

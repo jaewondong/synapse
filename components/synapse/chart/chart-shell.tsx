@@ -11,6 +11,7 @@ import { ReconciliationBanner } from './reconciliation-banner'
 import { WrongPatientGuard } from './wrong-patient-guard'
 import { useStripSourceParam } from '@/lib/hooks/use-strip-source-param'
 import type { ChartData, Department } from '@/lib/types/chart'
+import type { LabsData } from '@/lib/types/labs'
 
 function StripSource() {
   useStripSourceParam()
@@ -20,10 +21,11 @@ function StripSource() {
 interface ChartShellProps {
   data: ChartData
   initialDepartment: Department | null
+  labsData?: LabsData | null
 }
 
-export function ChartShell({ data, initialDepartment }: ChartShellProps) {
-  const { patient, problems, encounters, seizureLog, medications, imagingStudies, reconciliationPrompts, departmentCounts } = data
+export function ChartShell({ data, initialDepartment, labsData }: ChartShellProps) {
+  const { patient, problems, encounters, seizureLog, cardiacData, medications, imagingStudies, reconciliationPrompts, departmentCounts } = data
   const defaultDept: Department = 'neurology'
   const [activeDept, setActiveDept] = React.useState<Department>(initialDepartment ?? defaultDept)
 
@@ -85,6 +87,8 @@ export function ChartShell({ data, initialDepartment }: ChartShellProps) {
                 problems={deptProblems}
                 encounters={deptEncounters}
                 seizureLog={seizureLog}
+                cardiacData={cardiacData}
+                labsData={labsData}
                 encounterCount={deptCount}
                 lastVisit={lastVisit}
               />

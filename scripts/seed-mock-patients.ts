@@ -6,6 +6,69 @@ import * as path from 'path'
 const adapter = new PrismaBetterSqlite3({ url: 'file:./synapse.db' })
 const prisma = new PrismaClient({ adapter })
 
+interface RawLabResult {
+  test_name: string
+  value: string
+  unit: string | null
+  ref_range: string | null
+  flag: string | null
+  resulted_at: string | null
+  modified_by_type: string | null
+  modified_by_agent_name: string | null
+}
+
+interface RawCardiacStudy {
+  study_type: string
+  performed_at: string | null
+  summary: string | null
+  lvef: number | null
+  modified_by_type: string | null
+  modified_by_agent_name: string | null
+}
+
+interface RawDevice {
+  device_type: string
+  implanted_at: string | null
+  last_interrogation_at: string | null
+  battery_status: string | null
+  af_burden_pct: number | null
+  therapies_delivered: number | null
+  physician: string | null
+  modified_by_type: string | null
+  modified_by_agent_name: string | null
+}
+
+interface RawRiskScore {
+  name: string
+  display_name: string | null
+  value: number
+  severity: string
+  computed_at: string | null
+  inputs: unknown[] | null
+  agent_name: string | null
+  model_version: string | null
+}
+
+interface RawVitalSign {
+  taken_at: string | null
+  systolic: number | null
+  diastolic: number | null
+  hr: number | null
+  source: string | null
+}
+
+interface RawAgentObservation {
+  category: string
+  title: string
+  detail: string | null
+  agent_name: string | null
+  confidence: string | null
+  computed_at: string | null
+  why_rationale: string | null
+  why_inputs: unknown[] | null
+  dismissed: boolean
+}
+
 interface RawPatient {
   mrn: string
   first_name: string
@@ -44,6 +107,12 @@ interface RawPatient {
   care_team: RawCareTeamMember[]
   upcoming_appointment: RawAppointment | null
   reconciliation_prompts: RawReconciliationPrompt[]
+  lab_results?: RawLabResult[]
+  cardiac_studies?: RawCardiacStudy[]
+  devices?: RawDevice[]
+  risk_scores?: RawRiskScore[]
+  vital_signs?: RawVitalSign[]
+  agent_observations?: RawAgentObservation[]
 }
 
 interface RawInsurance {
@@ -346,6 +415,99 @@ async function main() {
             createdAt: rp.created_at,
             message: rp.message,
             resolved: rp.resolved ?? false,
+          })),
+        })
+      }
+
+      if (p.lab_results?.length) {
+        await tx.patientLabResult.createMany({
+          data: p.lab_results.map((r) => ({
+            patientId: pid,
+            testName: r.test_name,
+            value: r.value,
+            unit: r.unit,
+            refRange: r.ref_range,
+            flag: r.flag,
+            resultedAt: r.resulted_at,
+            modifiedByType: r.modified_by_type,
+            modifiedByAgentName: r.modified_by_agent_name,
+          })),
+        })
+      }
+
+      if (p.cardiac_studies?.length) {
+        await tx.patientCardiacStudy.createMany({
+          data: p.cardiac_studies.map((s) => ({
+            patientId: pid,
+            studyType: s.study_type,
+            performedAt: s.performed_at,
+            summary: s.summary,
+            lvef: s.lvef,
+            modifiedByType: s.modified_by_type,
+            modifiedByAgentName: s.modified_by_agent_name,
+          })),
+        })
+      }
+
+      if (p.devices?.length) {
+        await tx.patientDevice.createMany({
+          data: p.devices.map((d) => ({
+            patientId: pid,
+            deviceType: d.device_type,
+            implantedAt: d.implanted_at,
+            lastInterrogationAt: d.last_interrogation_at,
+            batteryStatus: d.battery_status,
+            afBurdenPct: d.af_burden_pct,
+            therapiesDelivered: d.therapies_delivered,
+            physician: d.physician,
+            modifiedByType: d.modified_by_type,
+            modifiedByAgentName: d.modified_by_agent_name,
+          })),
+        })
+      }
+
+      if (p.risk_scores?.length) {
+        await tx.patientRiskScore.createMany({
+          data: p.risk_scores.map((rs) => ({
+            patientId: pid,
+            name: rs.name,
+            displayName: rs.display_name,
+            value: rs.value,
+            severity: rs.severity,
+            computedAt: rs.computed_at,
+            inputs: rs.inputs ? JSON.stringify(rs.inputs) : null,
+            agentName: rs.agent_name,
+            modelVersion: rs.model_version,
+          })),
+        })
+      }
+
+      if (p.vital_signs?.length) {
+        await tx.patientVitalSign.createMany({
+          data: p.vital_signs.map((v) => ({
+            patientId: pid,
+            takenAt: v.taken_at,
+            systolic: v.systolic,
+            diastolic: v.diastolic,
+            hr: v.hr,
+            source: v.source,
+          })),
+        })
+      }
+
+      if (p.agent_observations?.length) {
+        await tx.patientAgentObservation.createMany({
+          data: p.agent_observations.map((o) => ({
+            patientId: pid,
+            category: o.category,
+            title: o.title,
+            detail: o.detail,
+            agentName: o.agent_name,
+            confidence: o.confidence,
+            computedAt: o.computed_at,
+            whyRationale: o.why_rationale,
+            whyInputs: o.why_inputs ? JSON.stringify(o.why_inputs) : null,
+            dismissed: o.dismissed ?? false,
           })),
         })
       }

@@ -53,6 +53,13 @@ model Patient {
   careTeamMembers       PatientCareTeamMember[]
   appointments          PatientAppointment[]
   reconciliationPrompts PatientReconciliationPrompt[]
+  labResults            PatientLabResult[]
+  cardiacStudies        PatientCardiacStudy[]
+  devices               PatientDevice[]
+  riskScores            PatientRiskScore[]
+  vitalSigns            PatientVitalSign[]
+  agentObservations     PatientAgentObservation[]
+  labOrders             LabOrder[]
 
   @@index([lastName, firstName])
   @@index([dateOfBirth])
@@ -232,4 +239,181 @@ model Decision {
   reason    String?
   decidedBy String
   decidedAt DateTime          @default(now())
+}
+
+model PatientLabResult {
+  id                  String  @id @default(cuid())
+  patientId           String
+  patient             Patient @relation(fields: [patientId], references: [id], onDelete: Cascade)
+  testName            String
+  value               String
+  unit                String?
+  refRange            String?
+  flag                String?
+  resultedAt          String?
+  modifiedByType      String?
+  modifiedByAgentName String?
+
+  @@index([patientId])
+}
+
+model PatientCardiacStudy {
+  id                  String  @id @default(cuid())
+  patientId           String
+  patient             Patient @relation(fields: [patientId], references: [id], onDelete: Cascade)
+  studyType           String
+  performedAt         String?
+  summary             String?
+  lvef                Int?
+  modifiedByType      String?
+  modifiedByAgentName String?
+
+  @@index([patientId])
+}
+
+model PatientDevice {
+  id                  String  @id @default(cuid())
+  patientId           String
+  patient             Patient @relation(fields: [patientId], references: [id], onDelete: Cascade)
+  deviceType          String
+  implantedAt         String?
+  lastInterrogationAt String?
+  batteryStatus       String?
+  afBurdenPct         Float?
+  therapiesDelivered  Int?
+  physician           String?
+  modifiedByType      String?
+  modifiedByAgentName String?
+
+  @@index([patientId])
+}
+
+model PatientRiskScore {
+  id           String  @id @default(cuid())
+  patientId    String
+  patient      Patient @relation(fields: [patientId], references: [id], onDelete: Cascade)
+  name         String
+  displayName  String?
+  value        Int
+  severity     String
+  computedAt   String?
+  inputs       String?
+  agentName    String?
+  modelVersion String?
+
+  @@index([patientId])
+}
+
+model PatientVitalSign {
+  id        String  @id @default(cuid())
+  patientId String
+  patient   Patient @relation(fields: [patientId], references: [id], onDelete: Cascade)
+  takenAt   String?
+  systolic  Int?
+  diastolic Int?
+  hr        Int?
+  source    String?
+
+  @@index([patientId])
+}
+
+model PatientAgentObservation {
+  id           String  @id @default(cuid())
+  patientId    String
+  patient      Patient @relation(fields: [patientId], references: [id], onDelete: Cascade)
+  category     String
+  title        String
+  detail       String?
+  agentName    String?
+  confidence   String?
+  computedAt   String?
+  whyRationale String?
+  whyInputs    String?
+  dismissed    Boolean @default(false)
+
+  @@index([patientId])
+}
+
+model LabCatalogItem {
+  code            String  @id
+  name            String
+  aliases         String?
+  category        String
+  specimen        String?
+  cpt             String?
+  setting         String  @default("both")
+  fastingRequired Boolean @default(false)
+  sendOut         Boolean @default(false)
+  defaultPriority String  @default("routine")
+  isPanel         Boolean @default(false)
+  panelComponents String?
+  orders          LabOrder[]
+
+  @@index([category])
+  @@index([name])
+}
+
+model LabOrderSet {
+  id          String @id @default(cuid())
+  name        String
+  setting     String @default("both")
+  memberCodes String
+}
+
+model PerformingLocation {
+  id           String     @id @default(cuid())
+  type         String
+  name         String
+  address      String?
+  active       Boolean    @default(true)
+  capabilities String?
+  questPscs    QuestPsc[]
+  orders       LabOrder[]
+}
+
+model QuestPsc {
+  id                   String             @id @default(cuid())
+  name                 String
+  address              String
+  zip                  String
+  hours                String?
+  lat                  Float?
+  lng                  Float?
+  performingLocationId String
+  performingLocation   PerformingLocation @relation(fields: [performingLocationId], references: [id])
+
+  @@index([zip])
+}
+
+model LabOrder {
+  id                   String              @id @default(cuid())
+  patientId            String
+  patient              Patient             @relation(fields: [patientId], references: [id], onDelete: Cascade)
+  catalogCode          String
+  catalogItem          LabCatalogItem      @relation(fields: [catalogCode], references: [code])
+  setting              String              @default("out")
+  priority             String              @default("routine")
+  frequency            String              @default("once")
+  futureDate           String?
+  indicationIcd        String?
+  indicationText       String?
+  performingLocationId String?
+  performingLocation   PerformingLocation? @relation(fields: [performingLocationId], references: [id])
+  pscId                String?
+  status               String              @default("pended")
+  pendedBy             String?
+  pendedByType         String?
+  pendedByAgentName    String?
+  pendedByRationale    String?
+  releasedBy           String?
+  orderedAt            String
+  releasedAt           String?
+  cancelledAt          String?
+  modifiedByType       String?
+  modifiedByAgentName  String?
+  notes                String?
+
+  @@index([patientId])
+  @@index([patientId, status])
+  @@index([catalogCode])
 }

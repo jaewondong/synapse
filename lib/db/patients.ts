@@ -19,6 +19,17 @@ import type {
   InsuranceEligibility,
   NoShowRisk,
 } from '@/lib/types/chart'
+import type {
+  CardiacData,
+  EFDataPoint,
+  VitalReading,
+  LabResult,
+  CardiacStudy,
+  DeviceRecord,
+  RiskScore,
+  RiskScoreInput,
+  GdmtFlag,
+} from '@/lib/types/cardiology'
 
 const PATIENT_INCLUDE = {
   insurances: true,
@@ -31,6 +42,12 @@ const PATIENT_INCLUDE = {
   careTeamMembers: true,
   appointments: { where: { status: 'Scheduled' }, take: 1, orderBy: { appointmentDate: 'asc' as const } },
   reconciliationPrompts: true,
+  labResults: true,
+  cardiacStudies: true,
+  devices: true,
+  riskScores: true,
+  vitalSigns: { orderBy: { takenAt: 'asc' as const } },
+  agentObservations: true,
 } as const
 
 type PatientWithRelations = NonNullable<Awaited<ReturnType<typeof findPatientByMrn>>>
@@ -285,6 +302,160 @@ async function getDocumentCount(mrn: string): Promise<number> {
   }
 }
 
+function mapLabResult(r: PatientWithRelations['labResults'][0]): LabResult {
+  return {
+    id: r.id,
+    testName: r.testName,
+    value: r.value,
+    unit: r.unit ?? '',
+    refRange: r.refRange ?? '',
+    flag: r.flag ?? 'Normal',
+    resultedAt: r.resultedAt ?? '',
+    modifiedByType: (r.modifiedByType ?? 'agent') as 'agent' | 'human',
+    modifiedByAgentName: r.modifiedByAgentName ?? undefined,
+  }
+}
+
+function mapCardiacStudy(s: PatientWithRelations['cardiacStudies'][0]): CardiacStudy {
+  return {
+    id: s.id,
+    studyType: s.studyType as CardiacStudy['studyType'],
+    performedAt: s.performedAt ?? '',
+    summary: s.summary ?? '',
+    lvef: s.lvef ?? undefined,
+    modifiedByType: (s.modifiedByType ?? 'agent') as 'agent' | 'human',
+    modifiedByAgentName: s.modifiedByAgentName ?? undefined,
+  }
+}
+
+function mapDevice(d: PatientWithRelations['devices'][0]): DeviceRecord {
+  return {
+    id: d.id,
+    deviceType: d.deviceType,
+    implantedAt: d.implantedAt ?? '',
+    lastInterrogationAt: d.lastInterrogationAt ?? '',
+    batteryStatus: d.batteryStatus ?? '',
+    afBurdenPct: d.afBurdenPct ?? 0,
+    therapiesDelivered: d.therapiesDelivered ?? 0,
+    physician: d.physician ?? undefined,
+    modifiedByType: (d.modifiedByType ?? 'agent') as 'agent' | 'human',
+    modifiedByAgentName: d.modifiedByAgentName ?? undefined,
+  }
+}
+
+function mapRiskScore(rs: PatientWithRelations['riskScores'][0]): RiskScore {
+  let inputs: RiskScoreInput[] = []
+  if (rs.inputs) {
+    try { inputs = JSON.parse(rs.inputs) } catch { inputs = [] }
+  }
+  return {
+    id: rs.id,
+    name: rs.name,
+    displayName: rs.displayName ?? rs.name,
+    value: rs.value,
+    severity: rs.severity as RiskScore['severity'],
+    computedAt: rs.computedAt ?? '',
+    inputs,
+    agentName: rs.agentName ?? 'Agent',
+  }
+}
+
+function mapVitalSign(v: PatientWithRelations['vitalSigns'][0]): VitalReading {
+  return {
+    date: v.takenAt ?? '',
+    systolic: v.systolic ?? 0,
+    diastolic: v.diastolic ?? 0,
+    hr: v.hr ?? 0,
+  }
+}
+
+function mapGdmtFlag(o: PatientWithRelations['agentObservations'][0]): GdmtFlag {
+  let whyInputs: string[] = []
+  if (o.whyInputs) {
+    try { whyInputs = JSON.parse(o.whyInputs) } catch { whyInputs = [] }
+  }
+  return {
+    id: o.id,
+    title: o.title,
+    detail: o.detail ?? '',
+    agentName: o.agentName ?? 'GDMT Agent',
+    confidence: (o.confidence ?? 'medium') as GdmtFlag['confidence'],
+    computedAt: o.computedAt ?? '',
+    whyRationale: o.whyRationale ?? '',
+    whyInputs,
+  }
+}
+
+function buildCardiacData(p: PatientWithRelations): CardiacData | null {
+  if (
+    !p.labResults.length &&
+    !p.cardiacStudies.length &&
+    !p.devices.length &&
+    !p.riskScores.length &&
+    !p.vitalSigns.length &&
+    !p.agentObservations.length
+  ) {
+    return null
+  }
+
+  // EF trend from echo studies sorted chronologically
+  const echos = [...p.cardiacStudies]
+    .filter((s) => s.studyType === 'echo' && s.lvef != null)
+    .sort((a, b) => (a.performedAt ?? '').localeCompare(b.performedAt ?? ''))
+  const efTrend: EFDataPoint[] = echos.map((s) => ({
+    date: s.performedAt ?? '',
+    value: s.lvef!,
+  }))
+  const latestEcho = echos[echos.length - 1] ?? null
+  const latestEf = latestEcho
+    ? {
+        value: latestEcho.lvef!,
+        date: latestEcho.performedAt ?? '',
+        agentName: latestEcho.modifiedByAgentName ?? 'Documentation Agent',
+        modifiedAt: latestEcho.performedAt ?? '',
+      }
+    : null
+
+  // NT-proBNP sparkline from lab results
+  const ntProBnp = p.labResults.filter((r) => r.testName.toLowerCase().includes('nt-probnp'))
+  const ntProBnpTrend = ntProBnp
+    .map((r) => parseFloat(r.value))
+    .filter((v) => !isNaN(v))
+
+  // Rhythm from agent observations
+  const rhythmObs = p.agentObservations.find((o) => o.category === 'rhythm')
+  const currentRhythm = rhythmObs?.detail ?? 'Paroxysmal AFib'
+
+  // GDMT flags
+  const gdmtFlags = p.agentObservations
+    .filter((o) => o.category === 'gdmt-flag' && !o.dismissed)
+    .map(mapGdmtFlag)
+
+  // Build a stable summary from risk scores if no explicit summary observation
+  const summaryObs = p.agentObservations.find((o) => o.category === 'summary')
+  const agentSummary = summaryObs?.detail ?? ''
+  const agentSummaryConfidence = (summaryObs?.confidence ?? 'high') as CardiacData['agentSummaryConfidence']
+  const agentSummaryGeneratedAt = summaryObs?.computedAt ?? ''
+
+  return {
+    agentSummary,
+    agentSummaryConfidence,
+    agentSummaryGeneratedAt,
+    efTrend,
+    latestEf,
+    currentRhythm,
+    vitalsTrend: p.vitalSigns.map(mapVitalSign),
+    labResults: p.labResults.map(mapLabResult),
+    ntProBnpTrend,
+    diagnostics: [...p.cardiacStudies]
+      .sort((a, b) => (b.performedAt ?? '').localeCompare(a.performedAt ?? ''))
+      .map(mapCardiacStudy),
+    riskScores: p.riskScores.map(mapRiskScore),
+    gdmtFlags,
+    device: p.devices.length > 0 ? mapDevice(p.devices[0]) : null,
+  }
+}
+
 export async function getChartData(mrn: string): Promise<ChartData | null> {
   const [p, docCount] = await Promise.all([
     findPatientByMrn(mrn),
@@ -315,6 +486,7 @@ export async function getChartData(mrn: string): Promise<ChartData | null> {
       .sort((a, b) => (b.encounterDate ?? '').localeCompare(a.encounterDate ?? ''))
       .map(mapEncounter),
     seizureLog: buildSeizureLog(p.seizureEvents),
+    cardiacData: buildCardiacData(p),
     medications: p.medications.filter((m) => m.active).map(mapMedication),
     imagingStudies: [...p.imagingStudies]
       .sort((a, b) => (b.studyDate ?? '').localeCompare(a.studyDate ?? ''))

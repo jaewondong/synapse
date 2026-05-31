@@ -160,6 +160,7 @@ export interface ChartData {
   problems: Problem[]
   encounters: Encounter[]
   seizureLog: SeizureLog | null
+  cardiacData: import('./cardiology').CardiacData | null
   medications: Medication[]
   imagingStudies: ImagingStudy[]
   reconciliationPrompts: ReconciliationPrompt[]
