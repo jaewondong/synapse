@@ -65,11 +65,34 @@
       "Bash(curl -s -X POST http://localhost:3000/api/labs/orders -H 'Content-Type: application/json' -d '{\"mrn\":\"00731649\"}')",
       "Bash(curl -s -X POST http://localhost:3000/api/labs/orders/release -H 'Content-Type: application/json' -d '{\"ids\":[]}')",
       "Bash(curl -s -o /dev/null -w \"%{http_code}\" http://localhost:3000/chart/00428193/labs)",
-      "Bash(curl -s http://localhost:3000/chart/00428193/labs)"
+      "Bash(curl -s http://localhost:3000/chart/00428193/labs)",
+      "Read(//c/Users/codyp/.claude/**)",
+      "Bash(claude models *)",
+      "PowerShell(Get-Content .env, .env.local | ForEach-Object { \\($_ -split '='\\)[0] }; Get-ChildItem node_modules\\\\next\\\\dist\\\\docs -Name | Select-Object -First 50)",
+      "PowerShell(Get-Content prisma\\\\schema.prisma -TotalCount 10; Get-Content prisma.config.ts; \\(Get-Content prisma\\\\schema.prisma | Measure-Object -Line\\).Lines)",
+      "PowerShell(npx prisma migrate dev --name add_insurance_agent)",
+      "PowerShell(node -e \"console.log\\(require\\('./node_modules/@anthropic-ai/sdk/package.json'\\).version\\)\"; Select-String -Path \"node_modules\\\\@anthropic-ai\\\\sdk\\\\src\\\\resources\\\\messages\\\\messages.ts\" -Pattern \"output_config|OutputConfig|adaptive\" | Select-Object -First 10 | ForEach-Object { $_.LineNumber.ToString\\(\\) + ': ' + $_.Line.Trim\\(\\) })",
+      "PowerShell(npx prisma generate)",
+      "PowerShell(Select-String -Path lib\\\\generated\\\\prisma\\\\client.ts -Pattern \"export\" | Select-Object -First 15 | ForEach-Object { $_.Line.Trim\\(\\) })",
+      "PowerShell(npx next build 2>&1)",
+      "PowerShell(npx next dev --port 3100)",
+      "PowerShell(Start-Sleep -Seconds 6; try { $r = Invoke-WebRequest -Uri \"http://localhost:3100/chart/00428193/insurance\" -UseBasicParsing -TimeoutSec 90; $r.StatusCode } catch { $_.Exception.Message })",
+      "PowerShell(Select-String -Path .env.local -Pattern \"SUPABASE_DOCUMENTS_BUCKET\" | ForEach-Object { $_.Line })",
+      "PowerShell(\\(Get-Content .env.local -Raw\\) -replace 'SUPABASE_DOCUMENTS_BUCKET=patient-documents','SUPABASE_DOCUMENTS_BUCKET=patient_documentation' | Set-Content .env.local -Encoding utf8 -NoNewline; Select-String -Path .env.local -Pattern \"SUPABASE_DOCUMENTS_BUCKET\" | ForEach-Object { $_.Line })",
+      "PowerShell(Start-Sleep -Seconds 3; $up = curl.exe -s -X POST \"http://localhost:3100/api/insurance/upload\" -F \"mrn=00428193\" -F \"front=@$env:TEMP\\\\ins-test\\\\mock-conflict.png;type=image/png\" | ConvertFrom-Json; $up | ConvertTo-Json -Depth 5)",
+      "PowerShell(npx tsx scripts\\\\tmp-cleanup-insurance-test.ts)",
+      "PowerShell(Remove-Item scripts\\\\tmp-cleanup-insurance-test.ts -Confirm:$false)",
+      "PowerShell(node scripts\\\\tmp-list-mrns.js)",
+      "PowerShell(Remove-Item scripts\\\\tmp-list-mrns.js -Confirm:$false)",
+      "PowerShell(node -e \"const p=require\\('./package.json'\\); console.log\\('hotkeys:', p.dependencies['react-hotkeys-hook'], 'zustand:', p.dependencies['zustand']\\)\")",
+      "PowerShell(Remove-Item \"components\\\\synapse\\\\ExplainabilityDrawer.tsx\" -Confirm:$false)",
+      "PowerShell(\"\")",
+      "PowerShell(git add -A)"
     ],
     "additionalDirectories": [
       "c:\\Users\\codyp\\synapse\\app\\api\\labs\\orders",
-      "c:\\Users\\codyp\\synapse\\app\\(app)\\chart\\[mrn]"
+      "c:\\Users\\codyp\\synapse\\app\\(app)\\chart\\[mrn]",
+      "C:\\Users\\codyp\\.claude"
     ]
   }
 }

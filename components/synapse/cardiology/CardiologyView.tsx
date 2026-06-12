@@ -1,7 +1,8 @@
 'use client'
 
 import * as React from 'react'
-import { ExplainabilityDrawer } from '@/components/synapse/ExplainabilityDrawer'
+import { agentActionPayload } from '@/lib/explainability'
+import { useExplainabilityStore } from '@/lib/stores/explainability-store'
 import { EFTrendCard } from './EFTrendCard'
 import { RhythmDeviceCard } from './RhythmDeviceCard'
 import { HemodynamicsCard } from './HemodynamicsCard'
@@ -23,10 +24,31 @@ const confidenceDot: Record<string, string> = {
 }
 
 export function CardiologyView({ cardiacData }: CardiologyViewProps) {
-  const [summaryDrawerOpen, setSummaryDrawerOpen] = React.useState(false)
-
   const cha2ds2Vasc = cardiacData.riskScores.find((rs) => rs.name === 'cha2ds2vasc') ?? null
   const hasBled = cardiacData.riskScores.find((rs) => rs.name === 'hasbled') ?? null
+
+  // "why" on the summary banner opens the global Explainability Drawer (§2.7)
+  function openSummaryWhy() {
+    useExplainabilityStore.getState().open(
+      agentActionPayload({
+        agentName: 'Cardiology Summary Agent',
+        timestamp: cardiacData.agentSummaryGeneratedAt,
+        title: 'Cardiology summary',
+        confidence: cardiacData.agentSummaryConfidence as 'high' | 'medium' | 'low',
+        actionSummary: cardiacData.agentSummary,
+        reasoning: [
+          "Synthesized from the patient's echocardiogram trend, active medication list, computed risk scores, and device interrogation data.",
+        ],
+        inputs: [
+          { label: 'Echo 04/2026', detail: 'LVEF 38%' },
+          { label: 'GDMT regimen', detail: 'ARNI + beta-blocker + MRA + SGLT2i' },
+          { label: `CHA₂DS₂-VASc: ${cha2ds2Vasc?.value ?? '—'}` },
+          { label: 'Apixaban active anticoagulation' },
+        ],
+        output: { label: 'Chart summary', preview: cardiacData.agentSummary },
+      }),
+    )
+  }
 
   return (
     <div className="mt-4">
@@ -59,7 +81,7 @@ export function CardiologyView({ cardiacData }: CardiologyViewProps) {
               )}
               <span>·</span>
               <button
-                onClick={() => setSummaryDrawerOpen(true)}
+                onClick={openSummaryWhy}
                 className="underline underline-offset-2 hover:text-muted-foreground transition-colors"
               >
                 why
@@ -113,16 +135,6 @@ export function CardiologyView({ cardiacData }: CardiologyViewProps) {
         )}
       </div>
 
-      <ExplainabilityDrawer
-        open={summaryDrawerOpen}
-        onClose={() => setSummaryDrawerOpen(false)}
-        title="Cardiology summary"
-        decision={cardiacData.agentSummary}
-        why="The Cardiology Summary Agent synthesized this overview from the patient's echocardiogram trend, active medication list, computed risk scores, and device interrogation data."
-        inputs={['Echo 04/2026: LVEF 38%', 'GDMT: ARNI + beta-blocker + MRA + SGLT2i', `CHA₂DS₂-VASc: ${cha2ds2Vasc?.value ?? '—'}`, 'Apixaban active anticoagulation']}
-        agentName="Cardiology Summary Agent"
-        computedAt={cardiacData.agentSummaryGeneratedAt}
-      />
     </div>
   )
 }

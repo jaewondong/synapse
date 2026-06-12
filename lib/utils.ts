@@ -45,6 +45,11 @@ export function formatDateOnly(isoString: string | null | undefined): string {
   return `${mm}/${dd}/${yyyy}`
 }
 
+// Joins segments with ' · ' after dropping empty/null entries (Master PRD §bug B2)
+export function joinDot(segments: Array<string | null | undefined>): string {
+  return segments.filter((s): s is string => !!s && s.trim().length > 0).join(' · ')
+}
+
 export function formatRelativeTime(isoString: string): string {
   const date = new Date(isoString)
   const now = new Date()

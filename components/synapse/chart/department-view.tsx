@@ -14,6 +14,7 @@ import {
   ArrowRight,
 } from 'lucide-react'
 import { AuditStrip } from './audit-strip'
+import { agentActionPayload } from '@/lib/explainability'
 import { NeurologyWidget } from './neurology-widget'
 import { CardiologyView } from '@/components/synapse/cardiology/CardiologyView'
 import { LabsOrderingView } from '@/components/synapse/labs/LabsOrderingView'
@@ -79,6 +80,16 @@ function ActiveProblems({ problems }: { problems: Problem[] }) {
                     modifiedByType={p.modifiedByType}
                     modifiedByAgentName={p.modifiedByAgentName}
                     modifiedAt={p.modifiedAt}
+                    explainability={agentActionPayload({
+                      agentName: p.modifiedByAgentName || 'Documentation Agent',
+                      timestamp: p.modifiedAt,
+                      title: 'Problem list entry drafted',
+                      actionSummary: `Added "${p.name}"${p.icd10 ? ` (${p.icd10})` : ''} to the problem list from encounter documentation.`,
+                      inputs: [
+                        { label: 'Encounter documentation', detail: [p.onset && `Onset ${p.onset}`, p.context].filter(Boolean).join(' · ') || undefined },
+                      ],
+                      output: { label: 'Problem list entry', preview: `${p.name}${p.icd10 ? ` — ${p.icd10}` : ''}` },
+                    })}
                   />
                 )}
               </div>

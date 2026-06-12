@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import { Toaster } from "sonner";
 import { QueryProvider } from "@/components/providers/query-provider";
+import { ExplainabilityDrawer } from "@/components/synapse/explainability/explainability-drawer";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -34,6 +35,8 @@ export default function RootLayout({
           {children}
         </QueryProvider>
         <Toaster position="bottom-right" richColors />
+        {/* Global Explainability Drawer — mounted exactly once (§2.7); surfaces invoke via store */}
+        <ExplainabilityDrawer />
       </body>
     </html>
   );

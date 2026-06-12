@@ -2,7 +2,8 @@
 
 import * as React from 'react'
 import { AuditStrip } from '@/components/synapse/chart/audit-strip'
-import { ExplainabilityDrawer } from '@/components/synapse/ExplainabilityDrawer'
+import { agentActionPayload, type RiskScorePayload } from '@/lib/explainability'
+import { useExplainabilityStore } from '@/lib/stores/explainability-store'
 import { formatDateOnly } from '@/lib/utils'
 import type { RiskScore, DeviceRecord } from '@/lib/types/cardiology'
 
@@ -25,9 +26,31 @@ const confidenceDot: Record<string, string> = {
   low: 'bg-confidence-low',
 }
 
-export function RhythmDeviceCard({ currentRhythm, cha2ds2Vasc, hasBled, device }: RhythmDeviceCardProps) {
-  const [drawerScore, setDrawerScore] = React.useState<RiskScore | null>(null)
+const interpretations: Record<RiskScore['severity'], string> = {
+  high: 'High risk for the associated outcome — review the factor breakdown and current therapy.',
+  moderate: 'Moderate risk for the associated outcome; weigh against treatment risk factors.',
+  low: 'Low risk for the associated outcome at this time.',
+}
 
+// Opens the global Explainability Drawer with a risk_score payload (§2.7.6.2)
+function openScore(rs: RiskScore) {
+  const payload: RiskScorePayload = {
+    kind: 'risk_score',
+    title: `${rs.displayName} Score`,
+    agentName: rs.agentName,
+    modifiedByType: 'agent',
+    timestamp: rs.computedAt,
+    confidence: 'high',
+    scoreName: rs.displayName,
+    totalPoints: rs.value,
+    maxPoints: 9,
+    factors: rs.inputs.map((i) => ({ criterion: i.label, points: i.value, met: i.value > 0 })),
+    interpretation: interpretations[rs.severity],
+  }
+  useExplainabilityStore.getState().open(payload)
+}
+
+export function RhythmDeviceCard({ currentRhythm, cha2ds2Vasc, hasBled, device }: RhythmDeviceCardProps) {
   return (
     <>
       <div className="rounded-lg border border-black/[0.08] bg-white p-4 space-y-4">
@@ -61,7 +84,7 @@ export function RhythmDeviceCard({ currentRhythm, cha2ds2Vasc, hasBled, device }
                   {cha2ds2Vasc.value} — {cha2ds2Vasc.severity}
                 </span>
                 <button
-                  onClick={() => setDrawerScore(cha2ds2Vasc)}
+                  onClick={() => openScore(cha2ds2Vasc)}
                   className="text-[11px] text-chart-subtle underline underline-offset-2 hover:text-muted-foreground transition-colors"
                 >
                   why
@@ -86,7 +109,7 @@ export function RhythmDeviceCard({ currentRhythm, cha2ds2Vasc, hasBled, device }
                   {hasBled.value} — {hasBled.severity}
                 </span>
                 <button
-                  onClick={() => setDrawerScore(hasBled)}
+                  onClick={() => openScore(hasBled)}
                   className="text-[11px] text-chart-subtle underline underline-offset-2 hover:text-muted-foreground transition-colors"
                 >
                   why
@@ -129,23 +152,25 @@ export function RhythmDeviceCard({ currentRhythm, cha2ds2Vasc, hasBled, device }
               modifiedByType={device.modifiedByType}
               modifiedByAgentName={device.modifiedByAgentName}
               modifiedAt={device.lastInterrogationAt}
+              explainability={agentActionPayload({
+                agentName: device.modifiedByAgentName ?? 'Device Agent',
+                timestamp: device.lastInterrogationAt,
+                title: 'Device interrogation filed',
+                actionSummary: `Filed the remote ${device.deviceType} interrogation from ${formatDateOnly(device.lastInterrogationAt)}: AF burden ${device.afBurdenPct}%, ${device.therapiesDelivered} therapies delivered, battery ${device.batteryStatus}.`,
+                inputs: [
+                  { label: `Remote interrogation — ${formatDateOnly(device.lastInterrogationAt)}` },
+                  { label: `Device record`, detail: `${device.deviceType}, implanted ${formatDateOnly(device.implantedAt)}` },
+                ],
+                output: {
+                  label: 'Interrogation summary',
+                  preview: `AF burden ${device.afBurdenPct}% · therapies delivered ${device.therapiesDelivered} · battery ${device.batteryStatus}`,
+                },
+              })}
             />
           </div>
         )}
       </div>
 
-      {drawerScore && (
-        <ExplainabilityDrawer
-          open={!!drawerScore}
-          onClose={() => setDrawerScore(null)}
-          title={`${drawerScore.displayName} — Score ${drawerScore.value}`}
-          decision={`${drawerScore.displayName} score is ${drawerScore.value} (${drawerScore.severity} risk).`}
-          why={`The score is computed by summing weighted risk factors. A score of ${drawerScore.value} indicates ${drawerScore.severity} risk.`}
-          inputs={drawerScore.inputs.map((i) => `${i.label}: +${i.value}`)}
-          agentName={drawerScore.agentName}
-          computedAt={drawerScore.computedAt}
-        />
-      )}
     </>
   )
 }

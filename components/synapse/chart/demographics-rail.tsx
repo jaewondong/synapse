@@ -1,5 +1,7 @@
 import * as React from 'react'
+import Link from 'next/link'
 import { AuditStrip } from './audit-strip'
+import { agentActionPayload } from '@/lib/explainability'
 import type { ChartPatient, Insurance, Allergy, CareTeamMember, UpcomingAppointment } from '@/lib/types/chart'
 
 function SectionLabel({ children }: { children: React.ReactNode }) {
@@ -74,7 +76,7 @@ const eligibilityColors: Record<Insurance['eligibility'], string> = {
   Error: 'text-chart-warning-text bg-chart-warning-bg',
 }
 
-function InsuranceCard({ insurance }: { insurance: Insurance }) {
+function InsuranceCard({ insurance, mrn }: { insurance: Insurance; mrn: string }) {
   return (
     <Card>
       <SectionLabel>Insurance</SectionLabel>
@@ -90,8 +92,26 @@ function InsuranceCard({ insurance }: { insurance: Insurance }) {
           modifiedByType={insurance.modifiedByType}
           modifiedByAgentName={insurance.modifiedByAgentName}
           modifiedAt={insurance.modifiedAt}
+          explainability={agentActionPayload({
+            agentName: insurance.modifiedByAgentName || 'Eligibility Agent',
+            timestamp: insurance.modifiedAt,
+            title: 'Insurance eligibility verified',
+            actionSummary: `Verified ${insurance.name} coverage with the payer; eligibility returned ${insurance.eligibility}.`,
+            patientMrn: mrn,
+            inputs: [
+              { label: 'Coverage record on file', detail: insurance.memberId ? `Member ${insurance.memberId}` : undefined },
+            ],
+            output: { label: 'Eligibility result', preview: `${insurance.name} — ${insurance.eligibility}` },
+          })}
         />
       )}
+      {/* Entry point to the Insurance Document Agent (§2.6) */}
+      <Link
+        href={`/chart/${mrn}/insurance`}
+        className="mt-1.5 block text-[11px] text-muted-foreground underline underline-offset-2 hover:text-foreground transition-colors"
+      >
+        Scan insurance document →
+      </Link>
     </Card>
   )
 }
@@ -196,7 +216,7 @@ export function DemographicsRail({
   return (
     <div className="flex flex-col gap-3">
       <DemographicsCard patient={patient} />
-      <InsuranceCard insurance={insurance} />
+      <InsuranceCard insurance={insurance} mrn={patient.mrn} />
       <AllergiesCard allergies={allergies} />
       <CareTeamCard members={careTeam} />
       <UpcomingCard appt={upcomingAppointment} />

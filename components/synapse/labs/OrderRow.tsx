@@ -3,6 +3,7 @@
 import * as React from 'react'
 import { X, ChevronDown, FlaskConical, Send } from 'lucide-react'
 import { AuditStrip } from '@/components/synapse/chart/audit-strip'
+import { agentActionPayload } from '@/lib/explainability'
 import { formatDateOnly } from '@/lib/utils'
 import type { LabOrder, OrderPriority, OrderFrequency, PerformingLocation, QuestPsc, OrderSetting } from '@/lib/types/labs'
 
@@ -85,6 +86,18 @@ export function OrderRow({ order, performingLocations, questPscs, onUpdate, onRe
               modifiedByType="agent"
               modifiedByAgentName={order.pendedByAgentName}
               modifiedAt={order.orderedAt}
+              explainability={agentActionPayload({
+                agentName: order.pendedByAgentName ?? 'Ordering Agent',
+                timestamp: order.orderedAt,
+                title: `Lab order pended — ${item.name}`,
+                actionSummary: `Pended a ${item.name} order for clinician release; the order does not transmit until released.`,
+                reasoning: order.pendedByRationale ? [order.pendedByRationale] : [],
+                inputs: [
+                  { label: 'Order context', detail: [order.indicationIcd, order.indicationText].filter(Boolean).join(' · ') || undefined },
+                ],
+                output: { label: 'Pended order', preview: `${item.name} · ${order.priority} · ${order.frequency}` },
+                decisionState: 'pending',
+              })}
             />
           )}
         </div>

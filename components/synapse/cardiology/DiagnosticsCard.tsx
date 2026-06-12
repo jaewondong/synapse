@@ -2,7 +2,8 @@
 
 import * as React from 'react'
 import { AuditStrip } from '@/components/synapse/chart/audit-strip'
-import { ExplainabilityDrawer } from '@/components/synapse/ExplainabilityDrawer'
+import { agentActionPayload, type AgentActionPayload } from '@/lib/explainability'
+import { useExplainabilityStore } from '@/lib/stores/explainability-store'
 import { formatDateOnly } from '@/lib/utils'
 import type { CardiacStudy } from '@/lib/types/cardiology'
 
@@ -17,9 +18,19 @@ const studyLabels: Record<string, string> = {
   'chest-xray': 'Chest X-ray',
 }
 
-export function DiagnosticsCard({ diagnostics }: DiagnosticsCardProps) {
-  const [drawerStudy, setDrawerStudy] = React.useState<CardiacStudy | null>(null)
+// Shared by the audit link and the "why" button — both open the global drawer.
+function studyPayload(s: CardiacStudy): AgentActionPayload {
+  return agentActionPayload({
+    agentName: s.modifiedByAgentName ?? 'Documentation Agent',
+    timestamp: s.performedAt,
+    title: `${studyLabels[s.studyType] ?? s.studyType} summarized`,
+    actionSummary: s.summary,
+    inputs: [{ label: `${studyLabels[s.studyType] ?? s.studyType} report — ${formatDateOnly(s.performedAt)}` }],
+    output: { label: 'Study summary', preview: s.summary },
+  })
+}
 
+export function DiagnosticsCard({ diagnostics }: DiagnosticsCardProps) {
   // Show only the most recent per type (non-echo) + latest echo
   const toShow: CardiacStudy[] = []
   const seenTypes = new Set<string>()
@@ -54,9 +65,10 @@ export function DiagnosticsCard({ diagnostics }: DiagnosticsCardProps) {
                     modifiedByType={s.modifiedByType}
                     modifiedByAgentName={s.modifiedByAgentName}
                     modifiedAt={s.performedAt}
+                    explainability={studyPayload(s)}
                   />
                   <button
-                    onClick={() => setDrawerStudy(s)}
+                    onClick={() => useExplainabilityStore.getState().open(studyPayload(s))}
                     className="text-[11px] text-chart-subtle underline underline-offset-2 hover:text-muted-foreground transition-colors"
                   >
                     why
@@ -68,18 +80,6 @@ export function DiagnosticsCard({ diagnostics }: DiagnosticsCardProps) {
         </div>
       </div>
 
-      {drawerStudy && (
-        <ExplainabilityDrawer
-          open={!!drawerStudy}
-          onClose={() => setDrawerStudy(null)}
-          title={`${studyLabels[drawerStudy.studyType] ?? drawerStudy.studyType} — ${formatDateOnly(drawerStudy.performedAt)}`}
-          decision={drawerStudy.summary}
-          why={`Agent extracted and summarized findings from the ${studyLabels[drawerStudy.studyType] ?? drawerStudy.studyType} report received on ${formatDateOnly(drawerStudy.performedAt)}.`}
-          inputs={['Source document: structured report', `Study type: ${drawerStudy.studyType}`, `Date: ${formatDateOnly(drawerStudy.performedAt)}`]}
-          agentName={drawerStudy.modifiedByAgentName ?? 'Documentation Agent'}
-          computedAt={drawerStudy.performedAt}
-        />
-      )}
     </>
   )
 }

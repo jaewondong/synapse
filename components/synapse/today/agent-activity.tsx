@@ -1,10 +1,24 @@
 'use client'
 
 import { formatRelativeTime } from '@/lib/utils'
-import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet'
+import { agentActionPayload } from '@/lib/explainability'
+import { useExplainabilityStore } from '@/lib/stores/explainability-store'
 import type { AgentActivityItem } from '@/lib/types/agent'
 
 function AuditStrip({ item }: { item: AgentActivityItem }) {
+  // [audit] opens the global Explainability Drawer (B10)
+  function openAudit() {
+    useExplainabilityStore.getState().open(
+      agentActionPayload({
+        agentName: item.agentName,
+        timestamp: item.timestamp,
+        title: 'Agent activity',
+        actionSummary: item.summary,
+        output: { label: 'Activity summary', preview: item.summary },
+      }),
+    )
+  }
+
   return (
     <div className="flex items-start gap-2 py-2.5">
       <span className="text-accent text-xs mt-0.5 shrink-0">⚡</span>
@@ -16,30 +30,12 @@ function AuditStrip({ item }: { item: AgentActivityItem }) {
         </p>
         <p className="text-xs text-muted-foreground mt-0.5 leading-relaxed">{item.summary}</p>
       </div>
-      <Sheet>
-        <SheetTrigger asChild>
-          <button className="text-xs text-accent hover:underline shrink-0 mt-0.5">
-            [audit]
-          </button>
-        </SheetTrigger>
-        <SheetContent side="right">
-          <SheetHeader>
-            <SheetTitle>Agent Audit Trail</SheetTitle>
-          </SheetHeader>
-          <div className="space-y-3 mt-2">
-            <p className="text-sm font-medium">{item.agentName}</p>
-            <p className="text-sm text-muted-foreground">{item.summary}</p>
-            <p className="text-xs text-muted-foreground">
-              Completed {formatRelativeTime(item.timestamp)}
-            </p>
-            <div className="rounded-lg border border-border bg-muted p-3">
-              <p className="text-xs text-muted-foreground">
-                Full explainability detail and confidence trace would appear here.
-              </p>
-            </div>
-          </div>
-        </SheetContent>
-      </Sheet>
+      <button
+        onClick={openAudit}
+        className="text-xs text-accent hover:underline shrink-0 mt-0.5"
+      >
+        [audit]
+      </button>
     </div>
   )
 }

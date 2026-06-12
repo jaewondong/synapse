@@ -1,7 +1,8 @@
 'use client'
 
 import * as React from 'react'
-import { ExplainabilityDrawer } from '@/components/synapse/ExplainabilityDrawer'
+import { agentActionPayload } from '@/lib/explainability'
+import { useExplainabilityStore } from '@/lib/stores/explainability-store'
 import { formatDateOnly } from '@/lib/utils'
 import type { GdmtFlag } from '@/lib/types/cardiology'
 
@@ -16,8 +17,24 @@ const confidenceDot: Record<string, string> = {
 }
 
 function GdmtFlagItem({ flag }: { flag: GdmtFlag }) {
-  const [drawerOpen, setDrawerOpen] = React.useState(false)
   const [dismissed, setDismissed] = React.useState(false)
+
+  // "why" opens the global Explainability Drawer (§2.7)
+  function openWhy() {
+    useExplainabilityStore.getState().open(
+      agentActionPayload({
+        agentName: flag.agentName,
+        timestamp: flag.computedAt,
+        title: flag.title,
+        confidence: flag.confidence,
+        actionSummary: flag.detail,
+        reasoning: [flag.whyRationale],
+        inputs: flag.whyInputs.map((label) => ({ label })),
+        output: { label: 'GDMT exception flag', preview: flag.detail },
+        decisionState: 'pending',
+      }),
+    )
+  }
 
   if (dismissed) return null
 
@@ -52,7 +69,7 @@ function GdmtFlagItem({ flag }: { flag: GdmtFlag }) {
               <span>{formatDateOnly(flag.computedAt)}</span>
               <span>·</span>
               <button
-                onClick={() => setDrawerOpen(true)}
+                onClick={openWhy}
                 className="underline underline-offset-2 hover:text-chart-warning-text transition-colors"
               >
                 why
@@ -80,16 +97,6 @@ function GdmtFlagItem({ flag }: { flag: GdmtFlag }) {
         </div>
       </div>
 
-      <ExplainabilityDrawer
-        open={drawerOpen}
-        onClose={() => setDrawerOpen(false)}
-        title={flag.title}
-        decision={flag.detail}
-        why={flag.whyRationale}
-        inputs={flag.whyInputs}
-        agentName={flag.agentName}
-        computedAt={flag.computedAt}
-      />
     </>
   )
 }

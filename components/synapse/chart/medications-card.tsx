@@ -1,6 +1,7 @@
 import * as React from 'react'
 import { Pill } from 'lucide-react'
 import { AuditStrip } from './audit-strip'
+import { agentActionPayload } from '@/lib/explainability'
 import { formatDateOnly } from '@/lib/utils'
 import type { Medication } from '@/lib/types/chart'
 
@@ -39,6 +40,16 @@ export function MedicationsCard({ medications }: MedicationsCardProps) {
                   modifiedByType={m.modifiedByType}
                   modifiedByAgentName={m.modifiedByAgentName}
                   modifiedAt={m.modifiedAt}
+                  explainability={agentActionPayload({
+                    agentName: m.modifiedByAgentName || 'Med Rec Agent',
+                    timestamp: m.modifiedAt,
+                    title: 'Medication entry reconciled',
+                    actionSummary: `Reconciled ${m.name} ${m.dose} ${m.frequency} onto the active medication list from outside records.`,
+                    inputs: [
+                      { label: 'Outside prescription record', detail: `Prescribed by ${m.prescriber}, started ${formatDateOnly(m.startDate)}` },
+                    ],
+                    output: { label: 'Medication list entry', preview: `${m.name} ${m.dose} ${m.frequency}` },
+                  })}
                 />
               )}
             </div>

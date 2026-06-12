@@ -3,6 +3,7 @@
 import * as React from 'react'
 import { ResponsiveContainer, LineChart, Line, Tooltip } from 'recharts'
 import { AuditStrip } from '@/components/synapse/chart/audit-strip'
+import { agentActionPayload } from '@/lib/explainability'
 import { formatDateOnly } from '@/lib/utils'
 import type { LabResult } from '@/lib/types/cardiology'
 
@@ -96,6 +97,20 @@ export function BiomarkersCard({ labResults, ntProBnpTrend }: BiomarkersCardProp
             modifiedByType="agent"
             modifiedByAgentName={latest[0].modifiedByAgentName}
             modifiedAt={latest[0].resultedAt}
+            explainability={agentActionPayload({
+              agentName: latest[0].modifiedByAgentName ?? 'Results Agent',
+              timestamp: latest[0].resultedAt,
+              title: 'Cardiac biomarkers filed',
+              actionSummary: `Filed ${latest.length} cardiac biomarker result${latest.length === 1 ? '' : 's'} from the lab interface, most recently ${latest[0].testName} ${latest[0].value} ${latest[0].unit ?? ''}.`,
+              inputs: latest.slice(0, 4).map((r) => ({
+                label: `${r.testName} — ${formatDateOnly(r.resultedAt)}`,
+                detail: [r.value, r.unit, r.flag].filter(Boolean).join(' '),
+              })),
+              output: {
+                label: 'Biomarker panel update',
+                preview: latest.map((r) => `${r.testName}: ${r.value} ${r.unit ?? ''}`).join('; '),
+              },
+            })}
           />
         </div>
       )}

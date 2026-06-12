@@ -385,6 +385,76 @@ model QuestPsc {
   @@index([zip])
 }
 
+// ---- Insurance Document Agent (§2.6) ----
+
+// One logical document: a single file, a multi-page PDF, or a front+back card pair.
+model InsuranceDocument {
+  id               String   @id @default(cuid())
+  patientMrn       String
+  documentType     String   @default("unknown") // insurance_card | eligibility_letter | eob | unknown
+  status           String   @default("uploaded") // uploaded | scanning | pending_review | approved | rejected
+  rejectReason     String?
+  pages            Int      @default(1)
+  // Storage refs — paths are slugs only, never original filenames (no PHI in paths).
+  bucket           String
+  frontStoragePath String
+  frontMimeType    String
+  backStoragePath  String?
+  backMimeType     String?
+  fileSize         Int
+  uploadedBy       String   @default("demo-user")
+  uploadedAt       DateTime @default(now())
+
+  extractions InsuranceExtraction[]
+
+  @@index([patientMrn, uploadedAt])
+}
+
+// Immutable once created — the Explainability Drawer's frozen-rationale rule.
+model InsuranceExtraction {
+  id           String            @id @default(cuid())
+  documentId   String
+  document     InsuranceDocument @relation(fields: [documentId], references: [id], onDelete: Cascade)
+  payload      String // JSON-encoded InsuranceExtraction contract (lib/types/insurance.ts)
+  agentName    String            @default("Insurance Agent")
+  modelVersion String
+  extractedAt  DateTime          @default(now())
+
+  @@index([documentId])
+}
+
+// Committed, versioned coverage record. Approving an extraction inserts a new
+// version and links the previous one — never destructive.
+model InsuranceCoverage {
+  id                       String   @id @default(cuid())
+  patientMrn               String
+  priority                 String   @default("primary") // primary | secondary
+  payerName                String
+  planName                 String?
+  planType                 String?
+  memberId                 String?
+  groupNumber              String?
+  subscriberName           String?
+  subscriberDob            String?
+  relationshipToSubscriber String?
+  effectiveDate            String?
+  rxBin                    String?
+  rxPcn                    String?
+  rxGroup                  String?
+  copays                   String? // JSON { pcp?, specialist?, er?, rx? }
+  payerPhone               String?
+  claimsAddress            String?
+  verifiedAt               String?
+  sourceDocumentId         String?
+  version                  Int      @default(1)
+  supersededById           String? // points at the newer version that replaced this row
+  modifiedByType           String   @default("agent")
+  modifiedByAgentName      String?
+  createdAt                DateTime @default(now())
+
+  @@index([patientMrn, version])
+}
+
 model LabOrder {
   id                   String              @id @default(cuid())
   patientId            String

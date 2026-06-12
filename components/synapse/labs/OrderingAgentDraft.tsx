@@ -3,7 +3,8 @@
 import * as React from 'react'
 import { CheckCheck, Pencil, Trash2, Plus, Send } from 'lucide-react'
 import { AuditStrip } from '@/components/synapse/chart/audit-strip'
-import { ExplainabilityDrawer } from '@/components/synapse/ExplainabilityDrawer'
+import { agentActionPayload } from '@/lib/explainability'
+import { useExplainabilityStore } from '@/lib/stores/explainability-store'
 import { Button } from '@/components/ui/button'
 import { formatDateOnly } from '@/lib/utils'
 import type { LabOrder } from '@/lib/types/labs'
@@ -18,6 +19,29 @@ interface OrderingAgentDraftProps {
 
 const confidenceDot = { high: 'bg-confidence-high', medium: 'bg-confidence-medium', low: 'bg-confidence-low' }
 
+// "why" opens the global Explainability Drawer with the order's rationale (§2.7)
+function openOrderWhy(order: LabOrder) {
+  useExplainabilityStore.getState().open(
+    agentActionPayload({
+      agentName: order.pendedByAgentName ?? 'Ordering Agent',
+      timestamp: order.orderedAt,
+      title: `${order.catalogItem.name} — ordering rationale`,
+      actionSummary: `Pended a ${order.catalogItem.name} order based on chart context; it does not transmit until a clinician releases it.`,
+      reasoning: [
+        order.pendedByRationale ??
+          "This test was selected based on the patient's active problems and clinical context.",
+      ],
+      inputs: [
+        order.indicationIcd ? { label: `Indication: ${order.indicationIcd}`, detail: order.indicationText ?? undefined } : null,
+        order.performingLocation ? { label: `Location: ${order.performingLocation.name}` } : null,
+        order.catalogItem.specimen ? { label: `Specimen: ${order.catalogItem.specimen}` } : null,
+      ].filter((i): i is NonNullable<typeof i> => i !== null),
+      output: { label: 'Pended order', preview: `${order.catalogItem.name} · ${order.priority} · ${order.frequency}` },
+      decisionState: 'pending',
+    }),
+  )
+}
+
 export function OrderingAgentDraft({
   agentOrders,
   onReleaseAll,
@@ -25,8 +49,6 @@ export function OrderingAgentDraft({
   onDiscardAll,
   releasing,
 }: OrderingAgentDraftProps) {
-  const [drawerOrder, setDrawerOrder] = React.useState<LabOrder | null>(null)
-
   if (!agentOrders.length) return null
 
   const inHouseCount = agentOrders.filter((o) => o.performingLocation?.type === 'in_house').length
@@ -92,9 +114,21 @@ export function OrderingAgentDraft({
                     modifiedByType="agent"
                     modifiedByAgentName={order.pendedByAgentName}
                     modifiedAt={order.orderedAt}
+                    explainability={agentActionPayload({
+                      agentName: order.pendedByAgentName ?? 'Ordering Agent',
+                      timestamp: order.orderedAt,
+                      title: `Lab order pended — ${order.catalogItem.name}`,
+                      actionSummary: `Pended a ${order.catalogItem.name} order based on chart context; it does not transmit until a clinician releases it.`,
+                      reasoning: order.pendedByRationale ? [order.pendedByRationale] : [],
+                      inputs: [
+                        { label: 'Chart context', detail: [order.indicationIcd, order.indicationText].filter(Boolean).join(' · ') || undefined },
+                      ],
+                      output: { label: 'Pended order', preview: `${order.catalogItem.name} · ${order.priority} · ${order.frequency}` },
+                      decisionState: 'pending',
+                    })}
                   />
                   <button
-                    onClick={() => setDrawerOrder(order)}
+                    onClick={() => openOrderWhy(order)}
                     className="text-[11px] text-chart-subtle underline underline-offset-2 hover:text-muted-foreground transition-colors ml-1"
                   >
                     why
@@ -132,24 +166,6 @@ export function OrderingAgentDraft({
         </div>
       </div>
 
-      {drawerOrder && (
-        <ExplainabilityDrawer
-          open={!!drawerOrder}
-          onClose={() => setDrawerOrder(null)}
-          title={`${drawerOrder.catalogItem.name} — Ordering rationale`}
-          decision={drawerOrder.indicationText ?? drawerOrder.catalogItem.name}
-          why={drawerOrder.pendedByRationale ?? 'This test was selected based on the patient\'s active problems and clinical context.'}
-          inputs={[
-            drawerOrder.indicationIcd ? `Indication: ${drawerOrder.indicationIcd}` : null,
-            drawerOrder.performingLocation ? `Location: ${drawerOrder.performingLocation.name}` : null,
-            `Priority: ${drawerOrder.priority}`,
-            drawerOrder.catalogItem.specimen ? `Specimen: ${drawerOrder.catalogItem.specimen}` : null,
-            drawerOrder.orderedAt ? `Pended: ${formatDateOnly(drawerOrder.orderedAt)}` : null,
-          ].filter((s): s is string => s !== null)}
-          agentName={drawerOrder.pendedByAgentName ?? 'Ordering Agent'}
-          computedAt={drawerOrder.orderedAt}
-        />
-      )}
     </>
   )
 }

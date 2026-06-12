@@ -1,7 +1,8 @@
 'use client'
 
 import * as React from 'react'
-import { ExplainabilityDrawer } from '@/components/synapse/ExplainabilityDrawer'
+import { agentActionPayload } from '@/lib/explainability'
+import { useExplainabilityStore } from '@/lib/stores/explainability-store'
 import type { SafetyAlert } from '@/lib/types/labs'
 
 interface SafetyChecksProps {
@@ -24,8 +25,23 @@ const alertTitles = {
 }
 
 function SafetyAlertCard({ alert, onResolve }: { alert: SafetyAlert; onResolve: (id: string, override?: string) => void }) {
-  const [drawerOpen, setDrawerOpen] = React.useState(false)
   const colors = alertColors[alert.type]
+
+  // "why" opens the global Explainability Drawer (§2.7)
+  function openWhy() {
+    useExplainabilityStore.getState().open(
+      agentActionPayload({
+        agentName: 'Ordering Agent',
+        timestamp: '',
+        title: `${alertTitles[alert.type]} — ${alert.testName}`,
+        confidence: 'medium',
+        actionSummary: alert.message,
+        reasoning: [alert.detail],
+        inputs: [{ label: alert.testName, detail: alertTitles[alert.type] }],
+        output: { label: 'Safety alert', preview: alert.message },
+      }),
+    )
+  }
 
   return (
     <>
@@ -50,7 +66,7 @@ function SafetyAlertCard({ alert, onResolve }: { alert: SafetyAlert; onResolve: 
               {alert.message}
             </p>
             <button
-              onClick={() => setDrawerOpen(true)}
+              onClick={openWhy}
               className="text-[11px] underline underline-offset-2 mt-1"
               style={{ color: colors.text, opacity: 0.7 }}
             >
@@ -77,15 +93,6 @@ function SafetyAlertCard({ alert, onResolve }: { alert: SafetyAlert; onResolve: 
         </div>
       </div>
 
-      <ExplainabilityDrawer
-        open={drawerOpen}
-        onClose={() => setDrawerOpen(false)}
-        title={`${alertTitles[alert.type]} — ${alert.testName}`}
-        decision={alert.message}
-        why={alert.detail}
-        inputs={[`Test: ${alert.testName}`, `Alert type: ${alert.type}`]}
-        agentName="Ordering Agent"
-      />
     </>
   )
 }

@@ -11,6 +11,7 @@ import {
   Tooltip,
 } from 'recharts'
 import { AuditStrip } from '@/components/synapse/chart/audit-strip'
+import { agentActionPayload } from '@/lib/explainability'
 import { formatDateOnly } from '@/lib/utils'
 import type { EFDataPoint } from '@/lib/types/cardiology'
 
@@ -94,6 +95,14 @@ export function EFTrendCard({ efTrend, latestEf }: EFTrendCardProps) {
             modifiedByType="agent"
             modifiedByAgentName={latestEf.agentName}
             modifiedAt={latestEf.modifiedAt}
+            explainability={agentActionPayload({
+              agentName: latestEf.agentName,
+              timestamp: latestEf.modifiedAt,
+              title: 'LVEF extracted from echo report',
+              actionSummary: `Extracted LVEF ${latestEf.value}% from the most recent echocardiogram report and updated the EF trend.`,
+              inputs: [{ label: `Echo report — ${formatDateOnly(latestEf.date)}` }],
+              output: { label: 'EF trend update', preview: `LVEF ${latestEf.value}% recorded ${formatDateOnly(latestEf.date)}.` },
+            })}
           />
         </div>
       )}
