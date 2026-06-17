@@ -38,10 +38,11 @@ export function CommandPalette({ open, onOpenChange }: CommandPaletteProps) {
   return (
     <div className="fixed inset-0 z-50 flex items-start justify-center pt-24">
       <div
-        className="absolute inset-0 bg-black/40"
+        className="absolute inset-0 bg-[rgba(15,23,42,0.40)] backdrop-blur-[2px]"
         onClick={() => onOpenChange(false)}
       />
-      <div className="relative w-full max-w-lg rounded-xl border border-border bg-card shadow-2xl overflow-hidden">
+      {/* Signature glass surface (§7.1) — the most premium moment in the app */}
+      <div className="glass glass--text relative w-full max-w-lg rounded-[var(--radius-xl)] overflow-hidden animate-in fade-in-0 zoom-in-95 duration-200">
         <Command className="[&_[cmdk-input-wrapper]]:border-b [&_[cmdk-input-wrapper]]:border-border">
           <div className="flex items-center gap-3 px-4 py-3 border-b border-border">
             <Search className="h-4 w-4 text-muted-foreground shrink-0" />

@@ -15,7 +15,7 @@ import {
 } from 'lucide-react'
 import { AuditStrip } from './audit-strip'
 import { agentActionPayload } from '@/lib/explainability'
-import { NeurologyWidget } from './neurology-widget'
+import { NeurologyView } from '@/components/synapse/neurology/NeurologyView'
 import { CardiologyView } from '@/components/synapse/cardiology/CardiologyView'
 import { LabsOrderingView } from '@/components/synapse/labs/LabsOrderingView'
 import { DocumentList } from '@/components/synapse/documents/document-list'
@@ -214,12 +214,18 @@ export function DepartmentView({
   patient,
   problems,
   encounters,
-  seizureLog,
   cardiacData,
   labsData,
   encounterCount,
   lastVisit,
 }: DepartmentViewProps) {
+  // Neurology renders the dedicated specialty surface (spine + condition
+  // modules) in place of the generic problems/encounters body, embedded inside
+  // the full chart shell so the department rail and all body systems remain.
+  if (department === 'neurology') {
+    return <NeurologyView mrn={mrn} patientName={patient?.name ?? ''} />
+  }
+
   if (department === 'labs' && labsData) {
     return (
       <div className="rounded-xl border border-black/[0.08] bg-white px-4 py-3.5">
@@ -279,9 +285,6 @@ export function DepartmentView({
       <RecentEncounters encounters={encounters} mrn={mrn} />
 
       {/* Specialty data */}
-      {department === 'neurology' && seizureLog && (
-        <NeurologyWidget seizureLog={seizureLog} />
-      )}
       {department === 'cardiology' && cardiacData && (
         <CardiologyView cardiacData={cardiacData} />
       )}

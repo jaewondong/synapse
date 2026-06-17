@@ -255,7 +255,8 @@ export function LabsOrderingView({ labsData, mrn, problems }: LabsOrderingViewPr
   }, [])
 
   return (
-    <div className="space-y-3 mt-4">
+    // .tnum cascades tabular numerals to all clinical values below (§2.8, §7.3)
+    <div className="space-y-3 mt-4 tnum">
       {/* Agent draft at top */}
       <OrderingAgentDraft
         agentOrders={agentOrders}

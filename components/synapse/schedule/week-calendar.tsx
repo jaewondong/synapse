@@ -14,6 +14,9 @@ const PIXELS_PER_MINUTE = 1.5
 const HOURS = Array.from({ length: END_HOUR - START_HOUR + 1 }, (_, i) => START_HOUR + i)
 const DAY_LABELS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
 
+// Categorical visit-type hues — intentionally NOT semantic signal tokens.
+// Luminous reserves --signal-* for clinical meaning (confidence/status); these
+// are neutral data categories on the schedule, so they keep distinct light hues.
 const VISIT_TYPE_COLORS: Record<string, string> = {
   new_patient_eval: 'bg-purple-100 border-purple-300 text-purple-800',
   follow_up: 'bg-blue-100 border-blue-300 text-blue-800',
@@ -242,10 +245,10 @@ export function WeekCalendar({
                 return (
                   <div
                     key="proposed"
-                    className="absolute left-1 right-1 rounded border-2 border-dashed border-green-400 bg-green-50/70 px-1.5 py-0.5 overflow-hidden pointer-events-none"
+                    className="absolute left-1 right-1 rounded border-2 border-dashed border-brand bg-brand-soft px-1.5 py-0.5 overflow-hidden pointer-events-none"
                     style={{ top, height }}
                   >
-                    <p className="text-[10px] font-semibold text-green-700 leading-tight">
+                    <p className="text-[10px] font-semibold text-brand leading-tight">
                       Proposed · {formatTime(proposedSlot.datetime)}
                     </p>
                   </div>
@@ -259,7 +262,7 @@ export function WeekCalendar({
                 return (
                   <div
                     key="booked"
-                    className="absolute left-1 right-1 rounded border border-green-300 bg-green-100 text-green-800 px-1.5 py-0.5 overflow-hidden"
+                    className="absolute left-1 right-1 rounded border border-signal-high/30 bg-signal-high-bg text-signal-high px-1.5 py-0.5 overflow-hidden"
                     style={{ top, height }}
                     title={`${bookedSlot.visit_type} · ${bookedSlot.provider_name} · ${formatTime(bookedSlot.datetime)}`}
                   >

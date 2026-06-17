@@ -33,7 +33,7 @@ export function AuditStrip({
   const line = joinDot([`${PROVENANCE_GLYPH.agent} ${agentLabel}`, safeFormatDate(modifiedAt)])
 
   return (
-    <div className="flex items-center gap-1.5 text-[11px] text-chart-subtle mt-1">
+    <div className="flex items-center gap-1.5 font-mono text-[11px] text-chart-subtle mt-1">
       <span>{line}</span>
       {explainability && (
         <>

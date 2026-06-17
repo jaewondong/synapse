@@ -201,12 +201,12 @@ export function LookupShell() {
               onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
               placeholder="DOB (MM/DD/YYYY)"
               className={cn(
-                'h-9 w-full rounded-lg border px-3 text-sm focus:outline-none focus:ring-2 focus:ring-accent/30 bg-white',
-                dobError ? 'border-red-300' : 'border-black/[0.08]'
+                'h-9 w-full rounded-lg border px-3 text-sm focus:outline-none focus:ring-2 focus:ring-accent/30 bg-surface',
+                dobError ? 'border-signal-low' : 'border-border-hairline'
               )}
             />
             {dobError && (
-              <p className="absolute top-full mt-1 text-[11px] text-red-600">{dobError}</p>
+              <p className="absolute top-full mt-1 text-[11px] text-signal-low">{dobError}</p>
             )}
           </div>
           <input

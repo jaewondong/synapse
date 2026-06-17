@@ -1,7 +1,7 @@
 'use client'
 
 import * as React from 'react'
-import { Search, Plus, Send } from 'lucide-react'
+import { Search, Plus, Send, Check } from 'lucide-react'
 import { searchCatalog } from '@/lib/labs/catalog'
 import type { CatalogItem, LabOrder } from '@/lib/types/labs'
 
@@ -136,7 +136,10 @@ export function CatalogSearch({ catalog, pendedCodes, onAdd, searchRef }: Catalo
                   }`}
                 >
                   {alreadyPended ? (
-                    '✓ Added'
+                    <>
+                      <Check className="h-3 w-3" />
+                      Added
+                    </>
                   ) : (
                     <>
                       <Plus className="h-3 w-3" />

@@ -13,19 +13,19 @@ interface ScheduleCardProps {
 function StatusPill({ status, riskLevel }: { status: Appointment['status']; riskLevel?: string }) {
   if (status === 'checked-in') {
     return (
-      <span className="inline-flex items-center gap-1 rounded-full bg-green-50 text-green-700 border border-green-200 text-xs px-2 py-0.5">
-        <span className="h-1.5 w-1.5 rounded-full bg-green-500" />
+      <span className="inline-flex items-center gap-1 rounded-full bg-signal-high-bg text-signal-high border border-signal-high/30 text-xs px-2 py-0.5">
+        <span className="h-1.5 w-1.5 rounded-full bg-signal-high" />
         Checked in
       </span>
     )
   }
   if (status === 'no-show-risk') {
     return (
-      <span className="inline-flex items-center gap-1 rounded-full bg-amber-50 text-amber-700 border border-amber-200 text-xs px-2 py-0.5">
+      <span className="inline-flex items-center gap-1 rounded-full bg-signal-med-bg text-signal-med border border-signal-med/30 text-xs px-2 py-0.5">
         <span
           className={cn(
             'h-1.5 w-1.5 rounded-full',
-            riskLevel === 'high' ? 'bg-confidence-low' : 'bg-confidence-medium'
+            riskLevel === 'high' ? 'bg-signal-low' : 'bg-signal-med'
           )}
         />
         No-show risk

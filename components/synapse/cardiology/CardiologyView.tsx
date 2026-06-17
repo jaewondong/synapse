@@ -51,7 +51,8 @@ export function CardiologyView({ cardiacData }: CardiologyViewProps) {
   }
 
   return (
-    <div className="mt-4">
+    // .tnum cascades tabular numerals to all clinical values below (§2.8, §7.3)
+    <div className="mt-4 tnum">
       {/* Section label */}
       <p className="mb-2 text-[11px] font-medium uppercase tracking-[0.5px] text-chart-subtle">
         Cardiology — agent-summarized

@@ -45,7 +45,7 @@ export function ReasonCapture({ operation, onConfirm, onCancel, className }: Rea
   }
 
   const opLabel = operation === 'approve' ? 'Approving' : operation === 'reject' ? 'Rejecting' : 'Snoozing'
-  const borderColor = operation === 'approve' ? 'border-accent/40' : operation === 'reject' ? 'border-red-200' : 'border-border'
+  const borderColor = operation === 'approve' ? 'border-accent/40' : operation === 'reject' ? 'border-signal-low/30' : 'border-border'
 
   return (
     <div

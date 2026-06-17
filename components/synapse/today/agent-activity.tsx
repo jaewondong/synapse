@@ -1,7 +1,7 @@
 'use client'
 
 import { formatRelativeTime } from '@/lib/utils'
-import { agentActionPayload } from '@/lib/explainability'
+import { agentActionPayload, PROVENANCE_GLYPH } from '@/lib/explainability'
 import { useExplainabilityStore } from '@/lib/stores/explainability-store'
 import type { AgentActivityItem } from '@/lib/types/agent'
 
@@ -21,7 +21,12 @@ function AuditStrip({ item }: { item: AgentActivityItem }) {
 
   return (
     <div className="flex items-start gap-2 py-2.5">
-      <span className="text-accent text-xs mt-0.5 shrink-0">⚡</span>
+      <span
+        className="text-muted-foreground text-xs mt-0.5 shrink-0"
+        aria-label="Agent-touched"
+      >
+        {PROVENANCE_GLYPH.agent}
+      </span>
       <div className="flex-1 min-w-0">
         <p className="text-xs text-foreground leading-snug">
           <span className="font-medium">{item.agentName}</span>

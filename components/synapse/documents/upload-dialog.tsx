@@ -242,9 +242,9 @@ export function UploadDialog({
         {(step === 'select' || step === 'confirm') && (
           <div className="p-5 space-y-5 overflow-y-auto max-h-[75vh]">
             {/* Demo banner */}
-            <div className="px-3 py-2 bg-amber-50 border border-amber-200 rounded-lg text-xs text-amber-700 flex items-center gap-1.5">
+            <div className="px-3 py-2 bg-signal-med-bg border border-signal-med/30 rounded-lg text-xs text-signal-med flex items-center gap-1.5">
               <span className="font-medium">Demo mode</span>
-              <span className="text-amber-600">— do not upload real patient data until a BAA is in place.</span>
+              <span className="text-signal-med">— do not upload real patient data until a BAA is in place.</span>
             </div>
 
             {/* File drop zone */}
@@ -419,7 +419,7 @@ export function UploadDialog({
         {/* Step: done */}
         {step === 'done' && (
           <div className="p-8 flex flex-col items-center gap-3">
-            <CheckCircle className="h-8 w-8 text-green-500" />
+            <CheckCircle className="h-8 w-8 text-signal-high" />
             <p className="text-sm font-medium">Upload complete</p>
             <p className="text-xs text-muted-foreground">{file?.name} filed under {patient?.name}</p>
           </div>
