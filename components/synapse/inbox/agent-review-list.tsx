@@ -2,6 +2,7 @@
 
 import * as React from 'react'
 import { useHotkeys } from 'react-hotkeys-hook'
+import { CheckCircle2 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { AgentCard } from '@/components/synapse/today/agent-card'
 import { BulkActionBar } from './bulk-action-bar'
@@ -132,8 +133,8 @@ export function AgentReviewList({ actions, totalCount }: AgentReviewListProps) {
 
   return (
     <div className="flex flex-col h-full">
-      {/* Sticky header */}
-      <div className="sticky top-0 z-10 bg-background border-b border-border px-6 py-3 space-y-2">
+      {/* Sticky glass header (chrome plane) */}
+      <div className="sticky top-0 z-10 bg-[var(--glass-bg-strong)] [-webkit-backdrop-filter:var(--glass-blur)] [backdrop-filter:var(--glass-blur)] border-b border-[var(--glass-border)] px-6 py-3 space-y-2">
         <div className="flex items-center justify-between gap-3">
           <span className="text-sm font-medium text-muted-foreground">
             {visible.length} item{visible.length !== 1 ? 's' : ''}
@@ -176,7 +177,10 @@ export function AgentReviewList({ actions, totalCount }: AgentReviewListProps) {
       <div className="flex-1 overflow-y-auto" ref={listRef}>
         {visible.length === 0 ? (
           <div className="flex flex-col items-center justify-center h-full py-24 text-center px-6">
-            <p className="text-base font-medium">Inbox zero in this category. ✓</p>
+            <p className="flex items-center gap-1.5 text-base font-medium">
+              Inbox zero in this category.
+              <CheckCircle2 className="h-4 w-4 text-signal-high" aria-hidden />
+            </p>
             <p className="text-sm text-muted-foreground mt-1">
               Auto-completed actions move to Today&apos;s recent activity.
             </p>

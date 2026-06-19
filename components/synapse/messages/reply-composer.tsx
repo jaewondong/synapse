@@ -75,9 +75,9 @@ export function ReplyComposer({
   return (
     <div className="border-t border-border bg-background shrink-0">
       {/* Demo mode banner */}
-      <div className="px-4 py-2 bg-amber-50 border-b border-amber-200 text-xs text-amber-700 flex items-center gap-1.5">
+      <div className="px-4 py-2 bg-signal-med-bg border-b border-signal-med/30 text-xs text-signal-med flex items-center gap-1.5">
         <span className="font-medium">Demo mode</span>
-        <span className="text-amber-600">— messages are not delivered to patients.</span>
+        <span className="text-signal-med">— messages are not delivered to patients.</span>
       </div>
 
       {/* Textarea */}
@@ -97,7 +97,7 @@ export function ReplyComposer({
       <div className="px-4 pb-3 flex items-center justify-between gap-3">
         <div className="flex items-center gap-3">
           {isSms && charCount > 0 && (
-            <span className={cn('text-xs tabular-nums', smsWarning ? 'text-amber-600' : 'text-muted-foreground')}>
+            <span className={cn('text-xs tabular-nums', smsWarning ? 'text-signal-med' : 'text-muted-foreground')}>
               {charCount} chars · {segments} segment{segments !== 1 ? 's' : ''}
             </span>
           )}

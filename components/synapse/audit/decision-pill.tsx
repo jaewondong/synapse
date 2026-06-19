@@ -6,8 +6,8 @@ interface DecisionPillProps {
 }
 
 const styles: Record<string, string> = {
-  approve: 'bg-confidence-high/15 text-confidence-high border-confidence-high/30',
-  reject: 'bg-red-50 text-red-600 border-red-200',
+  approve: 'bg-signal-high-bg text-signal-high border-signal-high/30',
+  reject: 'bg-signal-low-bg text-signal-low border-signal-low/30',
   snooze: 'bg-muted text-muted-foreground border-border',
 }
 

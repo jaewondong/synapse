@@ -103,10 +103,10 @@ function SlotCard({ slot }: { slot: SlotObject }) {
           className={cn(
             'inline-flex items-center rounded-md px-2 py-0.5 text-[10px] font-medium border',
             slot.no_show_risk === 'Low'
-              ? 'bg-green-50 text-green-700 border-green-200'
+              ? 'bg-signal-high-bg text-signal-high border-signal-high/30'
               : slot.no_show_risk === 'Medium'
-              ? 'bg-amber-50 text-amber-700 border-amber-200'
-              : 'bg-red-50 text-red-700 border-red-200',
+              ? 'bg-signal-med-bg text-signal-med border-signal-med/30'
+              : 'bg-signal-low-bg text-signal-low border-signal-low/30',
           )}
         >
           No-show risk: {slot.no_show_risk}
@@ -289,7 +289,7 @@ function MessageBubble({
             isUser
               ? 'bg-accent text-white rounded-tr-sm'
               : 'bg-muted text-foreground rounded-tl-sm',
-            msg.isError && 'bg-red-50 text-red-700 border border-red-200',
+            msg.isError && 'bg-signal-low-bg text-signal-low border border-signal-low/30',
           )}
         >
           {msg.content || (msg.isStreaming && !msg.toolCalls?.length ? '' : null)}

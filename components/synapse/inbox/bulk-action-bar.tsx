@@ -81,7 +81,7 @@ export function BulkActionBar({
           <Button
             size="sm"
             variant="outline"
-            className="h-7 px-2.5 text-xs text-red-600 border-red-200 hover:bg-red-50"
+            className="h-7 px-2.5 text-xs text-signal-low border-signal-low/30 hover:bg-signal-low-bg"
             onClick={() => setPendingBulk({ op: 'reject', ids: Array.from(selectedIds) })}
           >
             <X className="h-3 w-3 mr-1" />

@@ -10,21 +10,21 @@ interface InterventionStripProps {
 
 export function InterventionStrip({ escalation }: InterventionStripProps) {
   return (
-    <div className="rounded-xl border border-border border-l-4 border-l-amber-500 bg-amber-50/60 px-5 py-4">
+    <div className="rounded-xl border border-border border-l-4 border-l-signal-med bg-signal-med-bg px-5 py-4">
       <div className="flex items-start justify-between gap-4">
         <div className="flex items-start gap-3 min-w-0">
-          <AlertTriangle className="h-4 w-4 text-amber-600 shrink-0 mt-0.5" />
+          <AlertTriangle className="h-4 w-4 text-signal-med shrink-0 mt-0.5" />
           <div className="min-w-0">
-            <p className="text-sm font-semibold text-amber-900">{escalation.agentName}</p>
-            <p className="text-sm text-amber-800 mt-0.5">{escalation.situation}</p>
-            <p className="text-xs text-amber-700/70 mt-0.5">{escalation.patientRef}</p>
+            <p className="text-sm font-semibold text-foreground">{escalation.agentName}</p>
+            <p className="text-sm text-foreground/80 mt-0.5">{escalation.situation}</p>
+            <p className="text-xs text-muted-foreground mt-0.5">{escalation.patientRef}</p>
           </div>
         </div>
         <div className="flex items-center gap-2 shrink-0">
-          <Button size="sm" className="bg-amber-600 hover:bg-amber-700 text-white border-none">
+          <Button size="sm" className="bg-signal-med hover:bg-signal-med/90 text-white border-none">
             Take action
           </Button>
-          <Button size="sm" variant="ghost" className="text-amber-800 hover:bg-amber-100">
+          <Button size="sm" variant="ghost" className="text-signal-med hover:bg-signal-med/10">
             Defer to inbox
           </Button>
         </div>

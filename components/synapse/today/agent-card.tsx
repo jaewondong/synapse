@@ -12,6 +12,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
 import { ReasonCapture } from '@/components/synapse/inbox/reason-capture'
+import { PROVENANCE_GLYPH } from '@/lib/explainability'
 import { useDecideAction } from '@/lib/hooks/use-decide-action'
 import type { AgentAction } from '@/lib/types/agent'
 
@@ -34,10 +35,11 @@ interface AgentCardProps {
   onExpandedClose?: (id: string) => void
 }
 
+// Confidence color = signal tokens (single source; §2.4). Never numeric (§0).
 const confidenceColors: Record<string, string> = {
-  high: 'bg-confidence-high',
-  medium: 'bg-confidence-medium',
-  low: 'bg-confidence-low',
+  high: 'bg-signal-high',
+  medium: 'bg-signal-med',
+  low: 'bg-signal-low',
 }
 
 const snoozeDurations = ['1 hour', '4 hours', 'Tomorrow', 'Next week']
@@ -109,10 +111,17 @@ export function AgentCard({
 
         {/* Agent glyph + confidence dot */}
         <div className="flex flex-col items-center gap-1.5 pt-0.5 shrink-0">
-          <span className="text-accent text-base leading-none">⚡</span>
+          <span
+            className="text-muted-foreground text-base leading-none"
+            aria-label="Agent-touched"
+          >
+            {PROVENANCE_GLYPH.agent}
+          </span>
           <span
             className={cn('h-2 w-2 rounded-full', confidenceColors[action.confidence])}
             title={`${action.confidence} confidence`}
+            role="img"
+            aria-label={`Confidence: ${action.confidence}`}
           />
         </div>
 

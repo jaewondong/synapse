@@ -43,7 +43,7 @@ export function ChartShell({ data, initialDepartment, labsData }: ChartShellProp
   const viewedDept = activeDept === 'timeline' ? defaultDept : activeDept
 
   return (
-    <div className="mx-auto max-w-[1400px] px-4 py-4">
+    <div className="mx-auto max-w-[1400px] px-4 py-4 tnum">
       <React.Suspense fallback={null}>
         <StripSource />
       </React.Suspense>

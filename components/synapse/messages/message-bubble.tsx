@@ -61,7 +61,7 @@ export function MessageBubble({ message }: MessageBubbleProps) {
           className={cn(
             'text-[11px] px-1',
             message.delivery_status === 'failed'
-              ? 'text-red-500'
+              ? 'text-signal-low'
               : 'text-muted-foreground/70',
           )}
         >

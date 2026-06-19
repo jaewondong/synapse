@@ -1,48 +1,148 @@
 @import "tailwindcss";
 
+/* ============================================================================
+   Synapse Luminous design tokens (single source of truth — §2)
+   Bright, cool, glass-accented clinical UI. Two planes:
+   - data plane: opaque, high-contrast (surfaces below)
+   - chrome plane: may use .glass (transient chrome only)
+   No hex in components — everything routes through these vars + @theme below.
+   Dark mode is a later token swap (§6); the pass is light-only.
+   ========================================================================== */
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  /* §2.1 Surfaces (bright, opaque) */
+  --canvas:          #F7F9FC;   /* app background, cool near-white */
+  --surface:         #FFFFFF;   /* opaque data cards/panels */
+  --surface-muted:   #F1F4F9;   /* secondary panels, table header fill */
+  --surface-sunken:  #E9EDF4;   /* wells, inset areas */
+  --border-hairline: #E3E8F0;   /* 1px subtle dividers */
+  --border:          #CDD5E1;   /* standard component borders */
 
-  /* Synapse design tokens */
-  --agent-tint: hsl(210 100% 97%);
-  --confidence-high: hsl(142 71% 45%);
-  --confidence-medium: hsl(38 92% 50%);
-  --confidence-low: hsl(0 84% 60%);
-  --status-active: hsl(142 71% 45%);
-  --status-inactive: hsl(0 84% 60%);
+  /* §2.2 Text */
+  --text:            #0F172A;   /* primary (near-black, soft) */
+  --text-muted:      #475569;   /* secondary text, labels */
+  --text-subtle:     #94A3B8;   /* metadata, placeholders */
+  --text-on-brand:   #FFFFFF;
 
-  /* Surface / border tokens */
-  --card: #ffffff;
-  --card-foreground: #171717;
-  --border: hsl(214 32% 91%);
-  --muted: hsl(210 40% 96%);
-  --muted-foreground: hsl(215 16% 47%);
-  --accent: hsl(210 100% 56%);
-  --accent-foreground: #ffffff;
+  /* §2.3 Brand (single, restrained) */
+  --brand:           #2D5FD0;   /* primary actions, active nav, focus ring */
+  --brand-hover:     #2450B8;
+  --brand-soft:      #EAF0FD;   /* tinted backgrounds, selected rows */
 
-  /* Chart surface tokens */
-  --chart-surface: #F5F4EF;
-  --chart-raised: #FAF9F5;
-  --chart-subtle: #999999;
-  --chart-border-light: rgba(0, 0, 0, 0.08);
-  --chart-border-medium: rgba(0, 0, 0, 0.15);
+  /* §2.4 Semantic signal (highest saturation on screen — dots/badges/accents) */
+  --signal-high:     #15803D;   /* high confidence / normal / approved */
+  --signal-high-bg:  #E7F5EC;
+  --signal-med:      #B45309;   /* medium confidence / caution / edited */
+  --signal-med-bg:   #FBF0E0;
+  --signal-low:      #DC2626;   /* low confidence / critical / rejected / STAT */
+  --signal-low-bg:   #FCE8E8;
+  --signal-info:     #2563EB;   /* informational / neutral agent notes */
+  --signal-info-bg:  #E8EFFE;
 
-  /* Chart semantic colors */
-  --chart-info-bg: #E6F1FB;
-  --chart-info-text: #0C447C;
-  --chart-success-bg: #EAF3DE;
-  --chart-success-text: #27500A;
-  --chart-warning-bg: #FAEEDA;
-  --chart-warning-text: #633806;
-  --chart-warning-border: #EF9F27;
-  --chart-danger-bg: #FCEBEB;
-  --chart-danger-text: #791F1F;
-  --chart-neutral-bg: #F1EFE8;
-  --chart-neutral-text: #2C2C2A;
+  /* §2.5 Glass (chrome plane only) */
+  --glass-bg:        rgba(255, 255, 255, 0.68);
+  --glass-bg-strong: rgba(255, 255, 255, 0.82); /* text-bearing glass */
+  --glass-border:    rgba(15, 23, 42, 0.08);
+  --glass-highlight: inset 0 1px 0 rgba(255, 255, 255, 0.65);
+  --glass-blur:      blur(16px) saturate(160%);
+  --glass-fallback:  var(--surface);
+
+  /* §2.6 Radius */
+  --radius-sm:   6px;
+  --radius:      10px;  /* default: cards, inputs, buttons */
+  --radius-lg:   14px;  /* drawers, modals, large panels */
+  --radius-xl:   20px;  /* glass command palette */
+  --radius-pill: 999px; /* chips, dots, status pills */
+
+  /* §2.7 Elevation (soft, diffuse) */
+  --shadow-sm:      0 1px 2px rgba(15, 23, 42, 0.06);
+  --shadow:         0 4px 12px -2px rgba(15, 23, 42, 0.08);
+  --shadow-overlay: 0 16px 40px -8px rgba(15, 23, 42, 0.18); /* drawers/modals/palette */
+
+  /* §2.10 Motion */
+  --ease:      cubic-bezier(0.2, 0, 0, 1);
+  --dur-fast:  120ms;  /* hover, focus, color */
+  --dur:       180ms;  /* most transitions */
+  --dur-enter: 240ms;  /* drawer / modal / palette enter */
+
+  /* --------------------------------------------------------------------------
+     Legacy var names re-pointed to Luminous values. These keep ~35
+     chart/cardiology files reskinning without edits (every chart-* / accent
+     utility resolves through @theme inline → these vars).
+     -------------------------------------------------------------------------- */
+  --background:        var(--canvas);
+  --foreground:        var(--text);
+  --agent-tint:        var(--brand-soft);
+  --card:              var(--surface);
+  --card-foreground:   var(--text);
+  --muted:             var(--surface-muted);
+  --muted-foreground:  var(--text-muted);
+  --accent:            var(--brand);
+  --accent-foreground: var(--text-on-brand);
+
+  /* confidence → signal (was forked HSL; now single source) */
+  --confidence-high:   var(--signal-high);
+  --confidence-medium: var(--signal-med);
+  --confidence-low:    var(--signal-low);
+  --status-active:     var(--signal-high);
+  --status-inactive:   var(--signal-low);
+
+  /* Chart surfaces: warm paper → cool (user decision: full conversion) */
+  --chart-surface:       var(--canvas);
+  --chart-raised:        var(--surface);
+  --chart-subtle:        var(--text-subtle);
+  --chart-border-light:  var(--border-hairline);
+  --chart-border-medium: var(--border);
+
+  /* Chart semantics → signal tokens */
+  --chart-info-bg:       var(--signal-info-bg);
+  --chart-info-text:     var(--signal-info);
+  --chart-success-bg:    var(--signal-high-bg);
+  --chart-success-text:  var(--signal-high);
+  --chart-warning-bg:    var(--signal-med-bg);
+  --chart-warning-text:  var(--signal-med);
+  --chart-warning-border: var(--signal-med);
+  --chart-danger-bg:     var(--signal-low-bg);
+  --chart-danger-text:   var(--signal-low);
+  --chart-neutral-bg:    var(--surface-muted);
+  --chart-neutral-text:  var(--text-muted);
 }
 
 @theme inline {
+  /* Surfaces */
+  --color-canvas:         var(--canvas);
+  --color-surface:        var(--surface);
+  --color-surface-muted:  var(--surface-muted);
+  --color-surface-sunken: var(--surface-sunken);
+  --color-border-hairline: var(--border-hairline);
+
+  /* Text */
+  --color-text:           var(--text);
+  --color-text-muted:     var(--text-muted);
+  --color-text-subtle:    var(--text-subtle);
+  --color-text-on-brand:  var(--text-on-brand);
+
+  /* Brand */
+  --color-brand:          var(--brand);
+  --color-brand-hover:    var(--brand-hover);
+  --color-brand-soft:     var(--brand-soft);
+
+  /* Semantic signal */
+  --color-signal-high:    var(--signal-high);
+  --color-signal-high-bg: var(--signal-high-bg);
+  --color-signal-med:     var(--signal-med);
+  --color-signal-med-bg:  var(--signal-med-bg);
+  --color-signal-low:     var(--signal-low);
+  --color-signal-low-bg:  var(--signal-low-bg);
+  --color-signal-info:    var(--signal-info);
+  --color-signal-info-bg: var(--signal-info-bg);
+
+  /* Radius */
+  --radius-sm:   var(--radius-sm);
+  --radius-md:   var(--radius);
+  --radius-lg:   var(--radius-lg);
+  --radius-xl:   var(--radius-xl);
+
+  /* Legacy tokens (kept; now point at Luminous values) */
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --color-agent-tint: var(--agent-tint);
@@ -58,10 +158,10 @@
   --color-muted-foreground: var(--muted-foreground);
   --color-accent: var(--accent);
   --color-accent-foreground: var(--accent-foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --font-sans: var(--font-sans-stack);
+  --font-mono: var(--font-mono-stack);
 
-  /* Chart tokens */
+  /* Chart tokens (names kept; values now cool) */
   --color-chart-surface: var(--chart-surface);
   --color-chart-raised: var(--chart-raised);
   --color-chart-subtle: var(--chart-subtle);
@@ -78,21 +178,72 @@
   --color-chart-neutral-text: var(--chart-neutral-text);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-    --agent-tint: hsl(210 50% 12%);
-    --card: hsl(220 14% 10%);
-    --card-foreground: #ededed;
-    --border: hsl(217 32% 18%);
-    --muted: hsl(217 32% 15%);
-    --muted-foreground: hsl(215 16% 57%);
+/* ============================================================================
+   Utilities (§2.5, §2.8) — apply via class, never ad hoc.
+   ========================================================================== */
+
+/* Tabular numerals — REQUIRED on all clinical values (vitals, labs, doses,
+   scores, counts, timestamps) so numbers align and scan (§2.8, §7.3). */
+.tnum {
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: "tnum";
+}
+
+/* Glass — chrome plane only; never under clinical values (§2.5, §3). */
+.glass {
+  background: var(--glass-bg);
+  -webkit-backdrop-filter: var(--glass-blur);
+  backdrop-filter: var(--glass-blur);
+  border: 1px solid var(--glass-border);
+  box-shadow: var(--shadow-overlay), var(--glass-highlight);
+}
+.glass--text {
+  background: var(--glass-bg-strong); /* use when glass holds readable text */
+}
+
+/* Graceful degradation — no information is ever carried by translucency alone
+   (§1.4, §5). Solid surface when backdrop-filter is unsupported, when the user
+   prefers reduced transparency, and in print. */
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  .glass { background: var(--glass-fallback); }
+}
+@media (prefers-reduced-transparency: reduce) {
+  .glass,
+  .glass--text {
+    background: var(--glass-fallback);
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
   }
 }
+@media print {
+  .glass,
+  .glass--text {
+    background: #fff;
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+    box-shadow: none;
+  }
+}
+
+/* Honor reduced-motion (§2.10, §5) — keep instant opacity, cut transforms. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* Dark mode parked (§6): the previous @media (prefers-color-scheme: dark) block
+   overrode surfaces with dark values and fought the light system. Removed for
+   this light-only pass; a dark theme is a later token swap, not a refactor. */
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: var(--font-geist-sans), Arial, Helvetica, sans-serif;
+  font-family: var(--font-sans-stack), Arial, Helvetica, sans-serif;
+  font-size: 14px; /* clinical default (§2.8) */
 }

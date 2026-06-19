@@ -65,9 +65,10 @@ export function ExplainabilityDrawer() {
   return (
     <DialogPrimitive.Root open={isOpen} onOpenChange={(open) => !open && close()}>
       <DialogPrimitive.Portal>
-        <DialogPrimitive.Overlay className="fixed inset-0 z-50 bg-black/40 data-[state=open]:animate-in data-[state=open]:fade-in-0 data-[state=closed]:animate-out data-[state=closed]:fade-out-0" />
+        <DialogPrimitive.Overlay className="fixed inset-0 z-50 bg-[rgba(15,23,42,0.40)] backdrop-blur-[2px] data-[state=open]:animate-in data-[state=open]:fade-in-0 data-[state=closed]:animate-out data-[state=closed]:fade-out-0" />
+        {/* Glass frame (chrome); the reading core below is opaque --surface (§2.7) */}
         <DialogPrimitive.Content
-          className="fixed inset-y-0 right-0 z-50 flex w-[480px] max-w-full flex-col bg-card shadow-lg transition-transform duration-300 ease-in-out data-[state=open]:animate-in data-[state=open]:slide-in-from-right data-[state=closed]:animate-out data-[state=closed]:slide-out-to-right"
+          className="glass glass--text fixed inset-y-0 right-0 z-50 flex w-[480px] max-w-full flex-col rounded-l-[var(--radius-lg)] transition-transform duration-300 ease-in-out data-[state=open]:animate-in data-[state=open]:slide-in-from-right data-[state=closed]:animate-out data-[state=closed]:slide-out-to-right"
           aria-describedby={undefined}
         >
           {/* Header (fixed) */}
@@ -105,8 +106,8 @@ export function ExplainabilityDrawer() {
             </DialogPrimitive.Close>
           </div>
 
-          {/* Panel content (scrollable) */}
-          <div className="min-h-0 flex-1 overflow-y-auto overflow-x-hidden">
+          {/* Panel content (scrollable) — opaque reading core, never glass (§2.7) */}
+          <div className="min-h-0 flex-1 overflow-y-auto overflow-x-hidden bg-surface">
             {status === 'loading' && <SkeletonState />}
 
             {status === 'error' && (

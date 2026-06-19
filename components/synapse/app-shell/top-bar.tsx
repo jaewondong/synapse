@@ -35,7 +35,7 @@ export function TopBar({ onSidebarToggle }: TopBarProps) {
 
   return (
     <>
-      <header className="sticky top-0 z-30 flex h-14 items-center gap-3 border-b border-border bg-card px-4">
+      <header className="sticky top-0 z-30 flex h-14 items-center gap-3 border-b border-[var(--glass-border)] bg-[var(--glass-bg-strong)] [-webkit-backdrop-filter:var(--glass-blur)] [backdrop-filter:var(--glass-blur)] shadow-[var(--shadow-sm)] px-4">
         <button
           onClick={onSidebarToggle}
           className="rounded p-1.5 hover:bg-muted transition-colors text-muted-foreground"
@@ -65,7 +65,7 @@ export function TopBar({ onSidebarToggle }: TopBarProps) {
             size="icon"
             onClick={togglePhi}
             title={phiHidden ? 'Show PHI' : 'Redact PHI'}
-            className={cn(phiHidden && 'text-amber-600')}
+            className={cn(phiHidden && 'text-signal-med')}
           >
             {phiHidden ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
           </Button>
@@ -73,7 +73,7 @@ export function TopBar({ onSidebarToggle }: TopBarProps) {
           {/* Notification bell */}
           <Button variant="ghost" size="icon" className="relative">
             <Bell className="h-4 w-4" />
-            <span className="absolute top-1 right-1 h-2 w-2 rounded-full bg-red-500" />
+            <span className="absolute top-1 right-1 h-2 w-2 rounded-full bg-signal-low" />
           </Button>
 
           {/* Avatar dropdown */}
@@ -95,7 +95,7 @@ export function TopBar({ onSidebarToggle }: TopBarProps) {
                 Settings
               </DropdownMenuItem>
               <DropdownMenuSeparator />
-              <DropdownMenuItem className="text-red-600 focus:text-red-600">
+              <DropdownMenuItem className="text-signal-low focus:text-signal-low">
                 <LogOut className="h-3.5 w-3.5" />
                 Sign out
               </DropdownMenuItem>

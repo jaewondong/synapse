@@ -1,3 +1,4 @@
+import { PROVENANCE_GLYPH } from '@/lib/explainability'
 import type { AgentSummary } from './types'
 
 interface TodayGreetingProps {
@@ -22,11 +23,13 @@ export function TodayGreeting({ agentSummary }: TodayGreetingProps) {
       <p className="mt-1 text-sm text-muted-foreground">
         {formatted}
         <span className="mx-2 text-muted-foreground/40">·</span>
-        <span className="text-accent">⚡</span>{' '}
+        <span className="text-muted-foreground" aria-label="Agent-touched">
+          {PROVENANCE_GLYPH.agent}
+        </span>{' '}
         <span>
           {agentSummary.escalations > 0 && (
             <>
-              <span className="font-medium text-amber-600">
+              <span className="font-medium text-signal-med">
                 {agentSummary.escalations} escalation{agentSummary.escalations !== 1 ? 's' : ''}
               </span>
               <span className="mx-1.5 text-muted-foreground/40">·</span>
