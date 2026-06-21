@@ -36,6 +36,23 @@ export function EFTrendCard({ efTrend, latestEf }: EFTrendCardProps) {
   const prev = efTrend.length >= 2 ? efTrend[efTrend.length - 2] : null
   const isImproving = prev && latest && latest.value > prev.value
 
+  // Classify the EF severity from the actual value — not a hardcoded label.
+  const efValue = latestEf?.value ?? (efTrend.length ? efTrend[efTrend.length - 1].value : null)
+  const efCategory =
+    efValue == null
+      ? null
+      : efValue < 40
+        ? { tone: 'danger' as const, label: 'Reduced EF (<40%)' }
+        : efValue < 50
+          ? { tone: 'warning' as const, label: 'Mildly reduced EF (40–49%)' }
+          : { tone: 'success' as const, label: 'Preserved EF (≥50%)' }
+  const toneBadge = {
+    danger: 'bg-chart-danger-bg text-chart-danger-text',
+    warning: 'bg-chart-warning-bg text-chart-warning-text',
+    success: 'bg-chart-success-bg text-chart-success-text',
+  }
+  const seriesColor = efCategory ? `var(--chart-${efCategory.tone}-text)` : 'var(--chart-neutral-text)'
+
   return (
     <div className="rounded-lg border border-black/[0.08] bg-white p-4">
       <div className="flex items-start justify-between mb-3">
@@ -53,9 +70,11 @@ export function EFTrendCard({ efTrend, latestEf }: EFTrendCardProps) {
             {latestEf ? formatDateOnly(latestEf.date) : ''} · from echo
           </p>
         </div>
-        <span className="text-[11px] rounded px-1.5 py-0.5 bg-chart-danger-bg text-chart-danger-text font-medium">
-          Reduced EF (&lt;40%)
-        </span>
+        {efCategory && (
+          <span className={`text-[11px] rounded px-1.5 py-0.5 font-medium ${toneBadge[efCategory.tone]}`}>
+            {efCategory.label}
+          </span>
+        )}
       </div>
 
       {data.length > 0 && mounted && (
@@ -64,13 +83,13 @@ export function EFTrendCard({ efTrend, latestEf }: EFTrendCardProps) {
             <AreaChart data={data} margin={{ top: 4, right: 4, left: -28, bottom: 0 }}>
               <defs>
                 <linearGradient id="efGradient" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor="hsl(142 71% 45%)" stopOpacity={0.15} />
-                  <stop offset="95%" stopColor="hsl(142 71% 45%)" stopOpacity={0} />
+                  <stop offset="5%" stopColor={seriesColor} stopOpacity={0.15} />
+                  <stop offset="95%" stopColor={seriesColor} stopOpacity={0} />
                 </linearGradient>
               </defs>
-              <ReferenceLine y={40} stroke="hsl(0 84% 60%)" strokeDasharray="3 3" strokeWidth={1} />
-              <XAxis dataKey="date" tick={{ fontSize: 9, fill: '#999' }} tickLine={false} axisLine={false} />
-              <YAxis domain={[20, 50]} tick={{ fontSize: 9, fill: '#999' }} tickLine={false} axisLine={false} />
+              <ReferenceLine y={40} stroke="var(--chart-danger-text)" strokeDasharray="3 3" strokeWidth={1} />
+              <XAxis dataKey="date" tick={{ fontSize: 9, fill: 'var(--chart-neutral-text)' }} tickLine={false} axisLine={false} />
+              <YAxis domain={[20, 50]} tick={{ fontSize: 9, fill: 'var(--chart-neutral-text)' }} tickLine={false} axisLine={false} />
               <Tooltip
                 contentStyle={{ fontSize: 11, padding: '4px 8px', border: '1px solid rgba(0,0,0,0.08)' }}
                 formatter={(v) => [`${v ?? ''}%`, 'EF']}
@@ -78,10 +97,10 @@ export function EFTrendCard({ efTrend, latestEf }: EFTrendCardProps) {
               <Area
                 type="monotone"
                 dataKey="value"
-                stroke="hsl(142 71% 45%)"
+                stroke={seriesColor}
                 strokeWidth={1.5}
                 fill="url(#efGradient)"
-                dot={{ r: 2.5, fill: 'hsl(142 71% 45%)', strokeWidth: 0 }}
+                dot={{ r: 2.5, fill: seriesColor, strokeWidth: 0 }}
                 activeDot={{ r: 3.5 }}
               />
             </AreaChart>

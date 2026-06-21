@@ -56,10 +56,10 @@ export function FieldRow({
         onFocus={onFocus}
         className="mt-0.5 w-full bg-transparent text-[13px] focus:outline-none focus:ring-1 focus:ring-accent rounded px-1 -mx-1 placeholder:text-muted-foreground/50"
       />
-      {/* Provenance: agent-extracted ⊕ flips to ⊘ on human correction (§1.6). B2: empties filtered before · joins. */}
+      {/* Provenance: agent-extracted ⌁ flips to ✓ on human correction (§1.6). B2: empties filtered before · joins. */}
       <div className="mt-0.5 flex items-center gap-1 text-[11px] text-chart-subtle">
         {[
-          edited ? '⊘ you' : `⊕ ${agentName}`,
+          edited ? '✓ you' : `⌁ ${agentName}`,
           !edited && dateStr ? dateStr : '',
         ]
           .filter(Boolean)

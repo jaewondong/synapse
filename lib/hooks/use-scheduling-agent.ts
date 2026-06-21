@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useCallback } from 'react'
+import { useState, useCallback, useRef, useEffect } from 'react'
 import { useQueryClient } from '@tanstack/react-query'
 import type { AgentEvent } from '@/lib/agents/scheduling-agent'
 
@@ -46,6 +46,10 @@ export function useSchedulingAgent() {
   const [messages, setMessages] = useState<ChatMessage[]>([])
   const [isLoading, setIsLoading] = useState(false)
   const queryClient = useQueryClient()
+  const abortRef = useRef<AbortController | null>(null)
+
+  // Abort any in-flight stream when the consumer unmounts (no leaked reader).
+  useEffect(() => () => abortRef.current?.abort(), [])
 
   const seedConversation = useCallback((msg: Omit<ChatMessage, 'id'>) => {
     setMessages((prev) => [...prev, { ...msg, id: crypto.randomUUID() }])
@@ -70,11 +74,15 @@ export function useSchedulingAgent() {
       .map((m) => ({ role: m.role, content: m.content }))
     history.push({ role: 'user', content })
 
+    const controller = new AbortController()
+    abortRef.current = controller
+
     try {
       const res = await fetch('/api/scheduling-agent', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ messages: history }),
+        signal: controller.signal,
       })
 
       if (!res.ok || !res.body) {
@@ -150,6 +158,8 @@ export function useSchedulingAgent() {
         }
       }
     } catch (err) {
+      // Aborted streams (unmount / clear) are intentional — don't surface as an error.
+      if (err instanceof DOMException && err.name === 'AbortError') return
       const message = err instanceof Error ? err.message : 'Something went wrong'
       setMessages((prev) =>
         prev.map((m) =>
@@ -159,11 +169,15 @@ export function useSchedulingAgent() {
         ),
       )
     } finally {
+      if (abortRef.current === controller) abortRef.current = null
       setIsLoading(false)
     }
   }
 
-  const clearMessages = () => setMessages([])
+  const clearMessages = () => {
+    abortRef.current?.abort()
+    setMessages([])
+  }
 
   return { messages, isLoading, sendMessage, clearMessages, seedConversation }
 }

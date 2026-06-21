@@ -62,7 +62,7 @@ export function CardiologyView({ cardiacData }: CardiologyViewProps) {
       {cardiacData.agentSummary && (
         <div className="rounded-lg bg-agent-tint border border-black/[0.06] px-3.5 py-2.5 mb-4 flex items-start gap-2.5">
           <div className="flex flex-col items-center gap-1 pt-0.5 shrink-0">
-            <span className="text-accent text-sm leading-none">⊕</span>
+            <span className="text-accent text-sm leading-none">⌁</span>
             <span
               className={`h-2 w-2 rounded-full ${confidenceDot[cardiacData.agentSummaryConfidence]}`}
               title={`${cardiacData.agentSummaryConfidence} confidence`}

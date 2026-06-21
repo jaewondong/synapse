@@ -86,7 +86,7 @@ export function ReconciliationBanner({ prompts }: ReconciliationBannerProps) {
             <div key={p.id}>
               <p className="text-xs text-chart-warning-text">{p.message}</p>
               <div className="flex items-center gap-1.5 text-[11px] text-chart-warning-text/70 mt-1">
-                <span>⊕</span>
+                <span>⌁</span>
                 <span>{p.agentName}</span>
                 <span>·</span>
                 <span>{formatDateOnly(p.createdAt)}</span>

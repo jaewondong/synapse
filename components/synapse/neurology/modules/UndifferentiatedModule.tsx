@@ -48,7 +48,7 @@ function DifferentialRow({
     <div className="rounded-lg border border-black/[0.06] bg-agent-tint px-3 py-2.5">
       <div className="flex items-start gap-2.5">
         <div className="flex shrink-0 flex-col items-center gap-1 pt-0.5">
-          <span className="text-sm leading-none text-accent" title="Agent-suggested">⊕</span>
+          <span className="text-sm leading-none text-accent" title="Agent-suggested">⌁</span>
           <span className={cn('h-2 w-2 rounded-full', confidenceDot[item.confidence])} title={`${item.confidence} confidence`} />
         </div>
         <div className="min-w-0 flex-1">

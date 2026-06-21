@@ -14,7 +14,7 @@ export interface CatalogItem {
   setting: 'out' | 'in' | 'both'
   fastingRequired: boolean
   sendOut: boolean
-  defaultPriority: 'routine' | 'stat'
+  defaultPriority: OrderPriority
   isPanel: boolean
   panelComponents: string[]
 }

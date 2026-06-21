@@ -4,7 +4,7 @@ import * as React from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { Search, Loader2, X, FileText, ScanLine } from 'lucide-react'
-import { cn, safeFormatDate } from '@/lib/utils'
+import { safeFormatDate } from '@/lib/utils'
 import { InsuranceView } from '@/components/synapse/insurance/insurance-view'
 import type { PendingInsuranceDocument } from '@/lib/db/insurance'
 import type {

@@ -4,7 +4,6 @@ import * as React from 'react'
 import { X, ChevronDown, FlaskConical, Send } from 'lucide-react'
 import { AuditStrip } from '@/components/synapse/chart/audit-strip'
 import { agentActionPayload } from '@/lib/explainability'
-import { formatDateOnly } from '@/lib/utils'
 import type { LabOrder, OrderPriority, OrderFrequency, PerformingLocation, QuestPsc, OrderSetting } from '@/lib/types/labs'
 
 interface OrderRowProps {
@@ -46,7 +45,7 @@ export function OrderRow({ order, performingLocations, questPscs, onUpdate, onRe
       <div className="flex items-start gap-2">
         <div className="flex flex-col items-center gap-1 pt-0.5 shrink-0">
           {isAgent ? (
-            <span className="text-accent text-sm leading-none">⊕</span>
+            <span className="text-accent text-sm leading-none">⌁</span>
           ) : (
             <FlaskConical className="h-3.5 w-3.5 text-muted-foreground" />
           )}

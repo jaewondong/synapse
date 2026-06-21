@@ -199,4 +199,4 @@ Draft messages are stored in a module-level `Map<threadId, string>` (`draftStore
 Active query keys in use:
 - `['appointments', dateFrom, dateTo]` — schedule calendar
 - `['audit']` — audit log (invalidated after any decision)
-- `['actions']` — agent actions (used by `useAgentActions` hook, fetches audit log)
+- `['audit']` is the canonical decided-records key; pending agent actions are fetched server-side via `/api/actions` (no client hook)

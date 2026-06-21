@@ -311,7 +311,16 @@ export async function releaseLabOrders(
       })
       released.push(id)
     } catch {
-      failed.push(id)
+      // The update only matches `pended` rows, so a throw here usually means the
+      // order was already released (idempotent replay) rather than a real error.
+      // Treat an already-released order as a no-op success; only genuinely
+      // missing/other-status orders count as failed.
+      const existing = await prisma.labOrder.findUnique({ where: { id }, select: { status: true } })
+      if (existing?.status === 'released') {
+        released.push(id)
+      } else {
+        failed.push(id)
+      }
     }
   }
 

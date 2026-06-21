@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect, useCallback } from 'react'
-import { FileText, Trash2, RefreshCw, Upload } from 'lucide-react'
+import { FileText, Trash2, Upload } from 'lucide-react'
 import { toast } from 'sonner'
 import { cn, formatRelativeTime } from '@/lib/utils'
 import { supabase } from '@/lib/supabase/client'
@@ -26,25 +26,14 @@ function mimeLabel(mime: string): string {
 interface DocumentRowProps {
   doc: PatientDocument
   onOpen: (doc: PatientDocument) => void
-  onDelete: (id: string) => void
+  onDelete: (doc: PatientDocument) => void
 }
 
 function DocumentRow({ doc, onOpen, onDelete }: DocumentRowProps) {
-  const [deleting, setDeleting] = useState(false)
-
-  async function handleDelete(e: React.MouseEvent) {
+  function handleDelete(e: React.MouseEvent) {
     e.stopPropagation()
     if (!window.confirm(`Delete "${doc.file_name}"? This cannot be undone.`)) return
-    setDeleting(true)
-    const res = await fetch(`/api/documents/${doc.id}`, { method: 'DELETE' })
-    if (res.ok) {
-      toast.success('Document deleted')
-      onDelete(doc.id)
-    } else {
-      const json = await res.json()
-      toast.error(json.error ?? 'Delete failed')
-    }
-    setDeleting(false)
+    onDelete(doc)
   }
 
   return (
@@ -71,15 +60,11 @@ function DocumentRow({ doc, onOpen, onDelete }: DocumentRowProps) {
 
       <button
         onClick={handleDelete}
-        disabled={deleting}
         title="Delete document"
-        className="opacity-0 group-hover:opacity-100 transition-opacity p-1.5 rounded-md hover:bg-destructive/10 hover:text-destructive text-muted-foreground disabled:opacity-40"
+        aria-label="Delete document"
+        className="opacity-0 group-hover:opacity-100 transition-opacity p-1.5 rounded-md hover:bg-destructive/10 hover:text-destructive text-muted-foreground"
       >
-        {deleting ? (
-          <RefreshCw className="h-3.5 w-3.5 animate-spin" />
-        ) : (
-          <Trash2 className="h-3.5 w-3.5" />
-        )}
+        <Trash2 className="h-3.5 w-3.5" />
       </button>
     </button>
   )
@@ -136,8 +121,19 @@ export function DocumentList({
 
   useEffect(() => { fetchDocs() }, [fetchDocs, refreshTrigger])
 
-  function handleDeleted(id: string) {
-    setDocs((prev) => prev.filter((d) => d.id !== id))
+  async function handleDelete(doc: PatientDocument) {
+    const snapshot = docs
+    // Optimistic: drop the row immediately, restore + toast on failure.
+    setDocs((prev) => prev.filter((d) => d.id !== doc.id))
+    const res = await fetch(`/api/documents/${doc.id}`, { method: 'DELETE' })
+    if (res.ok) {
+      toast.success('Document deleted')
+    } else {
+      setDocs(snapshot)
+      let message = 'Delete failed'
+      try { message = (await res.json()).error ?? message } catch {}
+      toast.error(message)
+    }
   }
 
   const deptSet = Array.from(new Set(docs.map((d) => d.department))).sort()
@@ -210,7 +206,7 @@ export function DocumentList({
               key={doc.id}
               doc={doc}
               onOpen={setViewingDoc}
-              onDelete={handleDeleted}
+              onDelete={handleDelete}
             />
           ))}
         </div>

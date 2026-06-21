@@ -29,9 +29,6 @@ function Card({ children }: { children: React.ReactNode }) {
   )
 }
 
-function formatDob(iso: string): string {
-  return new Date(iso).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
-}
 
 function formatDateTime(iso: string): string {
   return new Date(iso).toLocaleString('en-US', {

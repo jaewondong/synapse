@@ -50,7 +50,7 @@ function GdmtFlagItem({ flag }: { flag: GdmtFlag }) {
         <div className="flex items-start gap-2.5">
           {/* Agent glyph + confidence dot */}
           <div className="flex flex-col items-center gap-1 pt-0.5 shrink-0">
-            <span className="text-chart-warning-text text-sm leading-none">⊕</span>
+            <span className="text-chart-warning-text text-sm leading-none">⌁</span>
             <span
               className={`h-2 w-2 rounded-full ${confidenceDot[flag.confidence]}`}
               title={`${flag.confidence} confidence`}

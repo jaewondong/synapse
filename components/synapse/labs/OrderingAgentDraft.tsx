@@ -1,12 +1,11 @@
 'use client'
 
 import * as React from 'react'
-import { CheckCheck, Pencil, Trash2, Plus, Send } from 'lucide-react'
+import { CheckCheck, Trash2, Plus, Send } from 'lucide-react'
 import { AuditStrip } from '@/components/synapse/chart/audit-strip'
 import { agentActionPayload } from '@/lib/explainability'
 import { useExplainabilityStore } from '@/lib/stores/explainability-store'
 import { Button } from '@/components/ui/button'
-import { formatDateOnly } from '@/lib/utils'
 import type { LabOrder } from '@/lib/types/labs'
 
 interface OrderingAgentDraftProps {
@@ -60,7 +59,7 @@ export function OrderingAgentDraft({
         {/* Header */}
         <div className="flex items-start gap-2.5 mb-3">
           <div className="flex flex-col items-center gap-1 pt-0.5 shrink-0">
-            <span className="text-accent text-base leading-none">⊕</span>
+            <span className="text-accent text-base leading-none">⌁</span>
             <span className={`h-2 w-2 rounded-full ${confidenceDot.high}`} title="high confidence" />
           </div>
           <div className="flex-1 min-w-0">

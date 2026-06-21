@@ -40,6 +40,7 @@ export function AuditStrip({
           <span>·</span>
           <button
             onClick={() => useExplainabilityStore.getState().open(explainability)}
+            aria-label="Open explanation"
             className="underline underline-offset-2 hover:text-muted-foreground transition-colors"
           >
             audit

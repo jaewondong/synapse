@@ -9,7 +9,6 @@ import {
   YAxis,
   ReferenceLine,
   Tooltip,
-  Legend,
 } from 'recharts'
 import { formatDateOnly } from '@/lib/utils'
 import type { VitalReading } from '@/lib/types/cardiology'

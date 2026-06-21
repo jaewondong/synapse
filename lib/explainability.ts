@@ -7,7 +7,7 @@ export type ExplainabilityKind = 'agent_action' | 'risk_score' | 'extraction'
 export type ConfidenceTier = 'high' | 'medium' | 'low'
 
 // Provenance glyphs (§1.6) — single source; never redeclare literals inline.
-export const PROVENANCE_GLYPH = { agent: '⊕', human: '⊘' } as const
+export const PROVENANCE_GLYPH = { agent: '⌁', human: '✓' } as const
 
 export interface ExplainabilityHeader {
   kind: ExplainabilityKind

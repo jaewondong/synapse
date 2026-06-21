@@ -19,7 +19,7 @@ export default async function BillingPage() {
               Insurance documents · agent-extracted, human-verified
             </p>
           </div>
-          <p className="text-[11px] text-chart-subtle">⊕ Insurance Agent</p>
+          <p className="text-[11px] text-chart-subtle">⌁ Insurance Agent</p>
         </div>
 
         <BillingShell pendingDocuments={pendingDocuments} />

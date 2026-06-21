@@ -230,7 +230,7 @@ export async function runSchedulingAgent(
 
   for (let i = 0; i < 10; i++) {
     const res = (await client.messages.create({
-      model: 'claude-opus-4-7',
+      model: 'claude-opus-4-8',
       max_tokens: 4096,
       thinking: { type: 'adaptive' } as { type: 'adaptive' },
       system: SYSTEM_PROMPT,

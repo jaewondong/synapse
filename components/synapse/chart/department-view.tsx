@@ -288,6 +288,11 @@ export function DepartmentView({
       {department === 'cardiology' && cardiacData && (
         <CardiologyView cardiacData={cardiacData} />
       )}
+      {department === 'cardiology' && !cardiacData && (
+        <div className="rounded-lg border border-border bg-card px-4 py-6 text-center text-sm text-muted-foreground">
+          No cardiac data on file for this patient.
+        </div>
+      )}
 
       {/* TODO: orders & results in scope */}
       {/* TODO: department notes */}

@@ -2,7 +2,7 @@
 
 import * as React from 'react'
 import { useHotkeys } from 'react-hotkeys-hook'
-import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet'
+import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet'
 import { Keyboard } from 'lucide-react'
 
 const shortcuts = [

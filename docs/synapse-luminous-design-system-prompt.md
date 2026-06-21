@@ -27,7 +27,7 @@ Reference points: the calm precision of a well-made clinical instrument and the 
 These predate this redesign and outrank every aesthetic choice below. If a visual rule here ever conflicts with one of these, the constraint wins and you flag the conflict.
 
 1. **Confidence = colored dots, never numbers.** One carve-out: clinical score point totals (e.g., CHA₂DS₂-VASc = 5) are real clinical values and may render as numerals.
-2. **Provenance glyphs:** `⊕` agent-touched, `⊘` human-touched. Required wherever provenance applies. Never drop them for visual cleanliness.
+2. **Provenance glyphs:** `⌁` agent-touched, `✓` human-touched. Required wherever provenance applies. Never drop them for visual cleanliness.
 3. **No emojis anywhere in the UI.** Use lucide icons.
 4. **Keyboard shortcut on every primary action.** Visible affordance (kbd hint) where space allows.
 5. **Skeleton loaders, never spinners.**
@@ -234,7 +234,7 @@ Allowed on: top app bar / sticky table headers, command palette (cmdk), Explaina
 - **Accessibility:** color is not the only channel — every dot has an `aria-label` (e.g., "Confidence: medium") and a tooltip; provide a legend on any dense view. Optional tier-distinct ring weight for additional non-color differentiation.
 
 ### Provenance glyph
-- `⊕` agent / `⊘` human, in `--text-muted`, sized to line. Never restyled away. Pair with `aria-label`.
+- `⌁` agent / `✓` human, in `--text-muted`, sized to line. Never restyled away. Pair with `aria-label`.
 
 ### Status / decision badges
 - Pill, tinted bg (`--signal-*-bg`) + text (`--signal-*`), `xs`/`sm`, weight 500, includes a text label (not color-only). pending=info, approved=high, edited=med, rejected=low.
@@ -261,7 +261,7 @@ Restyle, don't re-architect. Keep all behavior and the locked constraints.
 - **Review Queue:** dense table/list, data plane, compact mode, sticky glass header. Exception rows lead with their signal badge.
 - **Explainability Drawer (§2.7):** glass *frame* (`.glass`, `--radius-lg`, slide+fade enter), opaque inner `--surface` for the actual explanation/values. Header keeps glyph + agent + date; footer audit-trail unchanged. This is the showcase surface for "premium but legible."
 - **Intervention Modal:** glass scrim, opaque modal body, destructive actions use `--signal-low`. Anti-rubber-stamp friction stays.
-- **Audit Strip:** unchanged format `⊕ {agent} · {MM/DD/YYYY} · audit`; mono metadata; `joinDot` for segments; `audit` opens the drawer (B10). Restyle only color/weight to match tokens.
+- **Audit Strip:** unchanged format `⌁ {agent} · {MM/DD/YYYY} · audit`; mono metadata; `joinDot` for segments; `audit` opens the drawer (B10). Restyle only color/weight to match tokens.
 
 ---
 

@@ -36,7 +36,8 @@ export function ReviewQueuePreview({ actions, totalCount }: ReviewQueuePreviewPr
 
   React.useEffect(() => {
     const handler = (e: KeyboardEvent) => {
-      if ((e.target as HTMLElement).tagName === 'INPUT') return
+      const t = e.target as HTMLElement
+      if (t.tagName === 'INPUT' || t.tagName === 'TEXTAREA' || t.isContentEditable) return
       if (e.key === 'j') {
         setFocusedIndex((i) => Math.min((i ?? -1) + 1, visible.length - 1))
       } else if (e.key === 'k') {
@@ -45,7 +46,7 @@ export function ReviewQueuePreview({ actions, totalCount }: ReviewQueuePreviewPr
     }
     window.addEventListener('keydown', handler)
     return () => window.removeEventListener('keydown', handler)
-  }, [visible])
+  }, [visible.length])
 
   return (
     <div className="rounded-xl border border-border bg-card">

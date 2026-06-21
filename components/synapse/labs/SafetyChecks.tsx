@@ -51,7 +51,7 @@ function SafetyAlertCard({ alert, onResolve }: { alert: SafetyAlert; onResolve: 
       >
         <div className="flex items-start gap-2.5">
           <div className="flex flex-col items-center gap-1 pt-0.5 shrink-0">
-            <span className="text-sm leading-none" style={{ color: colors.text }}>⊕</span>
+            <span className="text-sm leading-none" style={{ color: colors.text }}>⌁</span>
             <span className="h-2 w-2 rounded-full bg-confidence-medium" title="medium confidence" />
           </div>
 

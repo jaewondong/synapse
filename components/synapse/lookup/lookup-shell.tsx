@@ -12,10 +12,6 @@ function formatDob(iso: string): string {
   return `${month}/${day}/${year}`
 }
 
-function formatAge(age: number, dob: string): string {
-  return `${age < 18 ? '' : ''}${age}`
-}
-
 function Avatar({ initials, size = 36 }: { initials: string; size?: number }) {
   return (
     <div

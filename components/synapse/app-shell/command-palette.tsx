@@ -14,7 +14,7 @@ const commands = [
   { label: 'Go to Today', icon: Calendar, shortcut: 'G T', href: '/' },
   { label: 'Go to Inbox', icon: Inbox, shortcut: 'G I', href: '/inbox' },
   { label: 'Go to Schedule', icon: Calendar, shortcut: 'G S', href: '/schedule' },
-  { label: 'Go to Patients', icon: Users, shortcut: 'G P', href: '/patients' },
+  { label: 'Go to Patients', icon: Users, shortcut: 'G P', href: '/lookup' },
   { label: 'Go to Documents', icon: FileText, shortcut: '', href: '/documents' },
   { label: 'Go to Agents', icon: Bot, shortcut: '', href: '/agents' },
   { label: 'Go to Reports', icon: BarChart2, shortcut: '', href: '/reports' },

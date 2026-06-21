@@ -186,7 +186,7 @@ export function ExtractionReview({ document, extraction, onDecided }: Extraction
           </span>
         </div>
         <p className="text-[11px] text-chart-subtle">
-          ⊕ {extraction.agentName} · proposal — nothing saves without your approval
+          ⌁ {extraction.agentName} · proposal — nothing saves without your approval
         </p>
       </div>
 
@@ -356,7 +356,7 @@ export function ExtractionReview({ document, extraction, onDecided }: Extraction
               {unresolved.length > 0
                 ? `${unresolved.length} conflict${unresolved.length > 1 ? 's' : ''} need${unresolved.length === 1 ? 's' : ''} a keep/replace choice before saving.`
                 : editedKeys.size > 0
-                  ? `${editedKeys.size} field${editedKeys.size > 1 ? 's' : ''} corrected — provenance flips to ⊘ on save.`
+                  ? `${editedKeys.size} field${editedKeys.size > 1 ? 's' : ''} corrected — provenance flips to ✓ on save.`
                   : 'Approving writes a new coverage version; the previous record is preserved.'}
             </p>
             <div className="flex items-center gap-2">

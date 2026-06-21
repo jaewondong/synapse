@@ -126,12 +126,13 @@ export function AuditTable() {
                 return (
                   <div
                     key={`exp-${row.entry.id}`}
+                    ref={virtualizer.measureElement}
+                    data-index={vRow.index}
                     style={{
                       position: 'absolute',
                       top: vRow.start,
                       left: 0,
                       right: 0,
-                      height: vRow.size,
                     }}
                   >
                     <AuditRowExpanded entry={row.entry} />
@@ -145,14 +146,16 @@ export function AuditTable() {
               return (
                 <div
                   key={entry.id}
+                  ref={virtualizer.measureElement}
+                  data-index={vRow.index}
                   style={{
                     position: 'absolute',
                     top: vRow.start,
                     left: 0,
                     right: 0,
-                    height: vRow.size,
+                    minHeight: 48,
                   }}
-                  className={`grid grid-cols-[1.5rem_1fr_1fr_7rem_8rem_7rem] gap-3 items-center px-4 border-b border-border/50 cursor-pointer transition-colors hover:bg-muted/40 text-sm ${isExpanded ? 'bg-muted/20' : ''}`}
+                  className={`grid grid-cols-[1.5rem_1fr_1fr_7rem_8rem_7rem] gap-3 items-center px-4 py-2 border-b border-border/50 cursor-pointer transition-colors hover:bg-muted/40 text-sm ${isExpanded ? 'bg-muted/20' : ''}`}
                   onClick={() => toggleExpanded(entry.id)}
                 >
                   <div className="text-muted-foreground/60">
