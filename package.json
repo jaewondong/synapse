@@ -9,7 +9,8 @@
     "lint": "eslint",
     "seed": "tsx prisma/seed.ts",
     "seed:mock-patients": "tsx scripts/seed-mock-patients.ts",
-    "seed:labs": "tsx scripts/seed-lab-catalog.ts"
+    "seed:labs": "tsx scripts/seed-lab-catalog.ts",
+    "seed:inbound-demo": "tsx scripts/seed-inbound-demo.ts"
   },
   "prisma": {
     "seed": "tsx prisma/seed.ts"

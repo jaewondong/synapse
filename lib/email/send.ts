@@ -17,6 +17,11 @@ import {
   AppointmentCancelledTemplateId,
   appointmentCancelledSubject,
 } from "./templates/AppointmentCancelled";
+import {
+  AppointmentConfirmation,
+  AppointmentConfirmationTemplateId,
+  appointmentConfirmationSubject,
+} from "./templates/AppointmentConfirmation";
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL ?? "",
@@ -58,6 +63,15 @@ async function renderForKind(ctx: EmailContext): Promise<RenderResult> {
         html: await render(el),
         text: await render(el, { plainText: true }),
         templateId: AppointmentCancelledTemplateId,
+      };
+    }
+    case "appointment_confirmation": {
+      const el = AppointmentConfirmation({ ctx });
+      return {
+        subject: appointmentConfirmationSubject(ctx),
+        html: await render(el),
+        text: await render(el, { plainText: true }),
+        templateId: AppointmentConfirmationTemplateId,
       };
     }
   }

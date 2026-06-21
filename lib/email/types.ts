@@ -51,7 +51,9 @@ export type ProviderLite = {
 export type NotificationKind =
   | "appointment_created"
   | "appointment_rescheduled"
-  | "appointment_cancelled";
+  | "appointment_cancelled"
+  // §2.9: patient-facing confirmation reply to an inbound scheduling email.
+  | "appointment_confirmation";
 
 export type EmailContext = {
   kind: NotificationKind;
@@ -59,4 +61,7 @@ export type EmailContext = {
   patient: PatientLite;
   provider: ProviderLite;
   recipients: string[];
+  // §2.9: the operator-reviewed (possibly edited) reply body. When present, the
+  // confirmation template renders it above the structured appointment details.
+  replyBody?: string;
 };

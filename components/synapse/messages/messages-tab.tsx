@@ -8,6 +8,17 @@ import { supabase } from '@/lib/supabase/client'
 import { MessageReadingPane } from './message-reading-pane'
 import { NewComposePane } from './new-compose-pane'
 import type { MessageThread, Message } from './types'
+import { InboxMessageDetail } from '@/components/synapse/inbox/InboxMessageDetail'
+import { InboundInjectMenu } from '@/components/synapse/inbox/inbound-inject-menu'
+import { listInboundRecords } from '@/components/synapse/inbox/inbound-api'
+import type { InboundEmailRecord, InboundStatus } from '@/lib/inbound/InboundEmail'
+
+const INBOUND_STATUS_LABEL: Record<InboundStatus, string> = {
+  new: 'New',
+  triaged: 'Triaged',
+  in_progress: 'In progress',
+  resolved: 'Resolved',
+}
 
 // Module-level draft store: survives component remounts within a session
 const draftStore = new Map<string, string>()
@@ -48,6 +59,11 @@ export function MessagesTab({ selectedThreadId, patientMrn, compose, returnTo }:
 
   const selectedThread = threads.find((t) => t.id === selectedThreadId) ?? null
 
+  // §2.9 inbound patient email → scheduling. Service-role table, fetched via API.
+  const [inboundRecords, setInboundRecords] = useState<InboundEmailRecord[]>([])
+  const selectedInboundId = searchParams.get('inbound')
+  const selectedInbound = inboundRecords.find((r) => r.id === selectedInboundId) ?? null
+
   // Active draft tracked in React state so the textarea re-renders on every keystroke.
   // draftStore persists the draft across thread switches within a session.
   const [activeDraft, setActiveDraft] = useState('')
@@ -73,6 +89,23 @@ export function MessagesTab({ selectedThreadId, patientMrn, compose, returnTo }:
       setLoadingThreads(false)
     }
     load()
+  }, [])
+
+  // Fetch inbound scheduling emails (setState runs post-await, off the effect body).
+  useEffect(() => {
+    let cancelled = false
+    async function load() {
+      try {
+        const recs = await listInboundRecords()
+        if (!cancelled) setInboundRecords(recs)
+      } catch {
+        /* table may not be migrated yet — leave the section empty */
+      }
+    }
+    load()
+    return () => {
+      cancelled = true
+    }
   }, [])
 
   // Patient MRN handoff: once threads are loaded, look up existing thread or enter compose mode
@@ -174,8 +207,14 @@ export function MessagesTab({ selectedThreadId, patientMrn, compose, returnTo }:
           closeThread()
         }
       }
-      // 'R' focuses composer
-      if (e.key === 'r' && selectedThreadId && document.activeElement?.tagName !== 'TEXTAREA') {
+      // 'R' focuses composer — only for a thread reply, not when an inbound
+      // record is open (its detail pane owns the 'r' key, §2.9).
+      if (
+        e.key === 'r' &&
+        selectedThreadId &&
+        !selectedInboundId &&
+        document.activeElement?.tagName !== 'TEXTAREA'
+      ) {
         e.preventDefault()
         setFocusTrigger((n) => n + 1)
       }
@@ -183,14 +222,40 @@ export function MessagesTab({ selectedThreadId, patientMrn, compose, returnTo }:
     window.addEventListener('keydown', onKeyDown)
     return () => window.removeEventListener('keydown', onKeyDown)
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [selectedThreadId, composePatient])
+  }, [selectedThreadId, composePatient, selectedInboundId])
 
   function selectThread(id: string) {
     setComposePatient(null)
     const params = new URLSearchParams(searchParams.toString())
     params.set('category', 'messages')
+    params.delete('inbound')
     params.set('thread', id)
     router.push(`/inbox?${params.toString()}`)
+  }
+
+  function selectInbound(id: string) {
+    setComposePatient(null)
+    const params = new URLSearchParams(searchParams.toString())
+    params.set('category', 'messages')
+    params.delete('thread')
+    params.set('inbound', id)
+    router.push(`/inbox?${params.toString()}`)
+  }
+
+  function closeInbound() {
+    const params = new URLSearchParams(searchParams.toString())
+    params.set('category', 'messages')
+    params.delete('inbound')
+    router.replace(`/inbox?${params.toString()}`)
+  }
+
+  function handleInboundUpdated(rec: InboundEmailRecord) {
+    setInboundRecords((prev) => prev.map((r) => (r.id === rec.id ? rec : r)))
+  }
+
+  async function handleInjected(rec: InboundEmailRecord) {
+    setInboundRecords((prev) => [rec, ...prev.filter((r) => r.id !== rec.id)])
+    selectInbound(rec.id)
   }
 
   function closeThread() {
@@ -232,7 +297,7 @@ export function MessagesTab({ selectedThreadId, patientMrn, compose, returnTo }:
     return thread.last_message_direction === 'inbound' && !openedThreads.has(thread.id)
   }
 
-  const showReadingPane = selectedThread || composePatient
+  const showReadingPane = selectedThread || composePatient || selectedInbound
   const effectiveReturnTo = returnTo ?? (patientMrn ? `/chart/${patientMrn}` : undefined)
 
   return (
@@ -249,9 +314,54 @@ export function MessagesTab({ selectedThreadId, patientMrn, compose, returnTo }:
           <span className="text-sm font-medium text-muted-foreground">
             {loadingThreads ? 'Loading…' : `${threads.length} threads`}
           </span>
+          <InboundInjectMenu onInjected={handleInjected} />
         </div>
 
         <div className="flex-1 overflow-y-auto divide-y divide-border/60">
+          {/* §2.9 — inbound patient email (scheduling) */}
+          {inboundRecords.length > 0 && (
+            <div className="bg-muted/10">
+              <p className="px-5 pt-3 pb-1.5 text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
+                Patient email · scheduling
+              </p>
+              {inboundRecords.map((rec) => {
+                const isSelected = rec.id === selectedInboundId
+                const urgent = rec.triage?.urgency === 'urgent'
+                return (
+                  <button
+                    key={rec.id}
+                    onClick={() => selectInbound(rec.id)}
+                    className={cn(
+                      'w-full flex items-start gap-3 px-5 py-4 text-left transition-colors',
+                      isSelected
+                        ? 'bg-agent-tint border-l-2 border-accent pl-[18px]'
+                        : 'hover:bg-muted/40',
+                    )}
+                  >
+                    <span
+                      className={cn(
+                        'h-2 w-2 rounded-full mt-1.5 shrink-0',
+                        urgent ? 'bg-chart-danger-text' : rec.status === 'new' ? 'bg-accent' : 'bg-transparent',
+                      )}
+                    />
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-medium truncate">{rec.fromName ?? rec.fromEmail}</p>
+                      <p className="text-xs text-muted-foreground mt-0.5 truncate">
+                        {rec.subject || '(no subject)'}
+                      </p>
+                      <span className="mt-1 inline-block rounded-full bg-muted px-2 py-0.5 text-[10px] text-muted-foreground">
+                        {INBOUND_STATUS_LABEL[rec.status]}
+                      </span>
+                    </div>
+                    <span className="text-xs text-muted-foreground shrink-0">
+                      {formatRelativeTime(rec.receivedAt)}
+                    </span>
+                  </button>
+                )
+              })}
+            </div>
+          )}
+
           {loadingThreads ? (
             <div className="px-6 py-8 text-sm text-muted-foreground text-center">Loading messages…</div>
           ) : threads.length === 0 ? (
@@ -302,8 +412,18 @@ export function MessagesTab({ selectedThreadId, patientMrn, compose, returnTo }:
         </div>
       </div>
 
+      {/* Reading pane — inbound scheduling email (§2.9) */}
+      {selectedInbound && (
+        <InboxMessageDetail
+          key={selectedInbound.id}
+          record={selectedInbound}
+          onUpdated={handleInboundUpdated}
+          onClose={closeInbound}
+        />
+      )}
+
       {/* Reading pane — existing thread */}
-      {selectedThread && (
+      {!selectedInbound && selectedThread && (
         <MessageReadingPane
           thread={selectedThread}
           messages={loadingMessages ? [] : threadMessages}
@@ -316,7 +436,7 @@ export function MessagesTab({ selectedThreadId, patientMrn, compose, returnTo }:
       )}
 
       {/* New-compose pane — no existing thread */}
-      {!selectedThread && composePatient && (
+      {!selectedInbound && !selectedThread && composePatient && (
         <NewComposePane
           patient={composePatient}
           returnTo={effectiveReturnTo ?? `/chart/${composePatient.mrn}`}
